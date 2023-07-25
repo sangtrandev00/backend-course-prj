@@ -6,10 +6,15 @@ const { validationResult } = require("express-validator");
 
 exports.getCourses = async (req, res, next) => {
   try {
-    const courses = await Course.find();
+    const courses = await Course.find()
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name avatar");
+    // courses will now contain the desired result with specific fields from the referenced documents
+
+    // Map here to create beautiful course
     res.status(200).json({
       message: "Fetch all Courses successfully!",
-      courses,
+      courses: courses,
     });
   } catch (error) {
     if (!error) {
@@ -21,11 +26,32 @@ exports.getCourses = async (req, res, next) => {
   }
 };
 
+// exports.countCourseByCateId = async (req, res, next) => {
+//   try {
+//     const count = await Course.countDocuments({
+//       categoryId: req.params.categoryId,
+//     });
+//     res.status(200).json({
+//       message: "Count Courses by CategoryId successfully!",
+//       count,
+//     });
+//   } catch (error) {
+//     if (!error) {
+//       const error = new Error("Failed to count Courses by CategoryId!");
+//       error.statusCode(422);
+//       return error;
+//     }
+//     next(error);
+//   }
+// };
+
 exports.getCourse = async (req, res, next) => {
   const { courseId } = req.params;
 
   try {
-    const course = await Course.findById(courseId);
+    const course = await Course.findById(courseId)
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name");
     res.status(200).json({
       message: "Fetch single course successfully!",
       course,

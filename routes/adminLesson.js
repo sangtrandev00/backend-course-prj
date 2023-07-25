@@ -17,6 +17,9 @@ router.get("/lessons", adminLessonController.getLessons);
 
 router.get("/lessons/:lessonId", adminLessonController.getLesson);
 
+// GET LESSON BY SECTION ID
+router.get("/lessons/:sectionId/section", adminLessonController.getLessonsBySectionId);
+
 // POST Lesson
 router.post("/lesson", uploadMiddleware.array("images[]"), adminLessonController.postLesson);
 

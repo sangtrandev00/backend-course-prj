@@ -10,20 +10,32 @@ const orderSchema = new Schema(
     vatFee: {
       type: Number,
     },
-    paymentMethod: { type: String, required: true, default: "COD" },
+    transaction: {
+      method: {
+        type: String,
+        required: true,
+        default: "COD",
+      },
+    },
     note: {
       type: String,
     },
-    status: { type: String, required: true, default: "Waiting to Confirm" },
+    vatFee: {
+      type: Number,
+    },
+    totalPrice: {
+      type: Number,
+    },
     user: {
+      _id: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
       email: {
         type: String,
         required: true,
       },
-      userId: {
-        type: String,
-      },
-      fullName: {
+      name: {
         type: String,
         required: true,
       },
@@ -32,32 +44,28 @@ const orderSchema = new Schema(
         required: true,
       },
     },
-    courses: {
-      items: [
-        {
-          courseId: {
-            type: String,
-            // ref: "Course",
-            // required: true,
-          },
-          price: {
-            type: Number,
-            required: true,
-          },
-          name: {
-            type: String,
-            required: true,
-          },
-          thumbnail: {
-            type: String,
-            required: true,
-          },
+
+    items: [
+      {
+        _id: {
+          type: Schema.Types.ObjectId,
+          ref: "Course",
+          // required: true,
         },
-      ],
-      totalPrice: {
-        type: Number,
+        finalPrice: {
+          type: Number,
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
+        thumbnail: {
+          type: String,
+          required: true,
+        },
       },
-    },
+    ],
   },
   { timestamps: true }
 );

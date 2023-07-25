@@ -45,7 +45,7 @@ exports.getSection = async (req, res, next) => {
   const { sectionId } = req.params;
 
   try {
-    const section = await Section.findById(sectionId);
+    const section = await Section.findById(sectionId).populate("courseId");
     res.status(200).json({
       message: "Fetch single section successfully!",
       section,
@@ -61,7 +61,7 @@ exports.getSection = async (req, res, next) => {
 };
 
 exports.postSection = async (req, res, next) => {
-  const { courseId, name, access, description } = req.body;
+  const { sectionId, name, access, description, type, content } = req.body;
 
   // console.log(req.files);
 
@@ -70,7 +70,9 @@ exports.postSection = async (req, res, next) => {
 
   try {
     const section = new Section({
-      courseId,
+      sectionId,
+      content,
+      type,
       name,
       access,
       description,

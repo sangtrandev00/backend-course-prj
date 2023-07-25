@@ -27,21 +27,24 @@ const discussSchema = new Schema(
           type: Schema.Types.ObjectId,
           ref: "User",
         },
-        name: {
-          type: String,
-          required: true,
-        },
-        avatar: {
-          type: String,
-          required: true,
-        },
         contentReply: {
           type: String,
           required: true,
         },
-        isLiked: {
-          type: Boolean,
+        createdAt: {
+          type: String,
           required: true,
+        },
+        updatedAt: {
+          type: String,
+        },
+      },
+    ],
+    emotions: [
+      {
+        userId: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
         },
         createdAt: {
           type: String,

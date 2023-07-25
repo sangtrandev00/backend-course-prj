@@ -141,6 +141,8 @@ exports.getOrders = async (req, res, next) => {
   try {
     const orders = await Order.find();
 
+    console.log(orders);
+
     res.json({
       message: "fetch all orders successfully!",
       orders,

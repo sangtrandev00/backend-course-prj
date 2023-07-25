@@ -1,6 +1,9 @@
 const Category = require("../models/Category");
 const Course = require("../models/Course");
+const IsLessonDone = require("../models/IsLessonDone");
+const Lesson = require("../models/Lesson");
 const Order = require("../models/Order");
+const Section = require("../models/Section");
 const User = require("../models/User");
 // const Category = require('../models/category');
 
@@ -65,6 +68,46 @@ exports.updateViews = async (req, res, next) => {
   }
 };
 
+exports.updateLessonDoneByUser = async (req, res, next) => {
+  const { lessonId } = req.params;
+
+  const { userId } = req.body;
+
+  try {
+    const lessonDoneByUser = await IsLessonDone.find({
+      lessonId: lessonId,
+      userId: userId,
+    });
+
+    if (!lessonDoneByUser) {
+      const lessonDone = new IsLessonDone({
+        lessonId: lessonId,
+        userId: userId,
+        isDone: true,
+      });
+
+      const result = await lessonDone.save();
+
+      res.status(200).json({
+        message: `Update lesson done successfully!`,
+        result,
+      });
+    } else {
+      res.status(200).json({
+        message: `Lesson aldready done by user`,
+        result: "nothing",
+      });
+    }
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to Update lesson done!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
 exports.getCourses = async (req, res, next) => {
   const { _limit, _sort, _order, _q, _min, _max, _page, _cateIds } = req.query;
 
@@ -114,7 +157,9 @@ exports.getCourses = async (req, res, next) => {
       }
     }
 
-    const Courses = await Course.find(query)
+    const courses = await Course.find(query)
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name")
       .skip(skip)
       .limit(_limit || 8)
       .sort({
@@ -125,7 +170,7 @@ exports.getCourses = async (req, res, next) => {
 
     res.status(200).json({
       message: "Fetch all Courses successfully!",
-      Courses,
+      courses,
       pagination: {
         _page: +_page || 1,
         _limit: +_limit || 12,
@@ -136,6 +181,47 @@ exports.getCourses = async (req, res, next) => {
     if (!error) {
       const error = new Error("Failed to fetch Courses!");
       error.statusCode = 422;
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getSectionsByCourseId = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+
+    const sectionsOfCourse = await Section.find({ courseId });
+
+    res.status(200).json({
+      message: "Fetch all Sections by course id successfully!",
+      sections: sectionsOfCourse,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch Sections by course id!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getLessonsBySectionId = async (req, res, next) => {
+  const { sectionId } = req.params;
+
+  try {
+    const lessonsOfSection = await Lesson.find({
+      sectionId: sectionId,
+    });
+    res.status(200).json({
+      message: "Fetch all lessons of section id successfully!",
+      lessons: lessonsOfSection,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch lessons!");
+      error.statusCode(422);
       return error;
     }
     next(error);
@@ -251,12 +337,50 @@ exports.getCoursesInRange = async (req, res, next) => {
 };
 
 exports.getCourse = async (req, res, next) => {
-  const { CourseId } = req.params;
+  const { courseId } = req.params;
   try {
-    const Course = await Course.findById(CourseId);
+    const course = await Course.findById(courseId)
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name");
     res.status(200).json({
       message: "Fetch single Course successfully!",
-      Course,
+      course,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch Courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getCoursesOrderedByUser = async (req, res, next) => {
+  const { userId } = req.params;
+
+  console.log(userId);
+
+  try {
+    const courses = await Order.find({
+      "user._id": userId,
+    })
+      .select("items")
+      .populate("items._id");
+
+    // .populate("categoryId", "_id name")
+    // .populate("userId", "_id name");
+
+    const results = courses
+      .map((courseItem) => {
+        return courseItem.items;
+      })
+      .flat()
+      .map((item) => item._id);
+
+    res.status(200).json({
+      message: "Fetch Courses by user have ordered successfully!",
+      courses: results,
     });
   } catch (error) {
     if (!error) {
@@ -269,29 +393,35 @@ exports.getCourse = async (req, res, next) => {
 };
 
 exports.postOrder = async (req, res, next) => {
-  const { note, paymentMethod, vatFee, shippingFee, Courses, user } = req.body;
+  const { note, transaction, vatFee, items, user, totalPrice } = req.body;
 
   try {
+    const courses = await Course.find({
+      _id: {
+        $in: items.map((item) => item.courseId),
+      },
+    });
+
     const order = new Order({
       note,
-      vatFee: 10,
-      shippingFee: 20,
-      paymentMethod,
-      Courses,
+      vatFee,
+      totalPrice,
+      transaction: {
+        method: transaction.method,
+      },
+      items: courses,
       user,
-      status: "Waiting to Confirm",
     });
-    console.log("Create order!");
 
     const response = await order.save();
     // Update qty Course at database (-qty);
-    Courses.items.forEach(async (Course) => {
-      const { prodId, qty } = Course;
-      console.log("update stock qty at database!!!");
-      const CourseItem = await Course.findById(prodId);
-      CourseItem.stockQty = CourseItem.stockQty - qty;
-      CourseItem.save();
-    });
+    // Courses.items.forEach(async (Course) => {
+    //   const { prodId, qty } = Course;
+    //   console.log("update stock qty at database!!!");
+    //   const CourseItem = await Course.findById(prodId);
+    //   CourseItem.stockQty = CourseItem.stockQty - qty;
+    //   CourseItem.save();
+    // });
 
     // for (const Course of Courses.items) {
     //   const { prodId, qty } = Course;
@@ -341,7 +471,7 @@ exports.getUser = async (req, res, next) => {
   console.log("id: ", userId);
 
   try {
-    const { user } = await User.findById(userId);
+    const user = await User.findById(userId);
 
     console.log(user);
 

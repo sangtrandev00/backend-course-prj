@@ -21,14 +21,35 @@ exports.getLessons = async (req, res, next) => {
   }
 };
 
+exports.getLessonsBySectionId = async (req, res, next) => {
+  const { sectionId } = req.params;
+
+  try {
+    const lessonsOfSection = await Lesson.find({
+      sectionId: sectionId,
+    });
+    res.status(200).json({
+      message: "Fetch all lessons of section id successfully!",
+      lessons: lessonsOfSection,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch lessons!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
 exports.getLesson = async (req, res, next) => {
   const { lessonId } = req.params;
 
   try {
-    const Lesson = await Lesson.findById(lessonId);
+    const lesson = await Lesson.findById(lessonId);
     res.status(200).json({
       message: "Fetch single Lesson successfully!",
-      Lesson,
+      lesson,
     });
   } catch (error) {
     if (!error) {

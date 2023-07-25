@@ -10,6 +10,12 @@ router.get("/courses", clientController.getCourses);
 // GET Course
 router.get("/courses/:courseId", clientController.getCourse);
 
+// GET SECTIONS BY COURSE ID
+router.get("/sections/:courseId/course", clientController.getSectionsByCourseId);
+
+// GET SECTIONS BY COURSE ID
+router.get("/lessons/:sectionId/section", clientController.getLessonsBySectionId);
+
 // POST reset password
 
 // GET CATES
@@ -28,11 +34,17 @@ router.get("/categories/:categoryId", clientController.getCategory);
 
 router.patch("/courses/:courseId", clientController.updateViews);
 
+// UPDATE CURRENT LESSON DONE BY USER ID
+router.put("/lesson-done/:lessonId", clientController.updateLessonDoneByUser);
+
 // POST ORDER
 router.post("/order", clientController.postOrder);
 
 // GET ORDER: id
 router.get("/orders/:orderId", clientController.getOrder);
+
+// GET COURSE BY STUDENTS HAVE BOUGHT
+router.get("/courses/:userId/ordered", clientController.getCoursesOrderedByUser);
 
 // GET USER: id
 

@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const Course = require("../models/Course");
 const { deleteFile } = require("../utils/file");
 const { validationResult } = require("express-validator");
 exports.getCategories = async (req, res, next) => {
@@ -6,9 +7,37 @@ exports.getCategories = async (req, res, next) => {
     const categories = await Category.find();
     // console.log("categories: ", categories);
 
+    const finalCategories = categories.map(async (cate) => {
+      try {
+        const courses = await Course.countDocuments({
+          categoryId: cate._id,
+        });
+
+        console.log(courses);
+
+        return {
+          _id: cate._id,
+          name: cate.name,
+          cateImage: cate.cateImage,
+          cateSlug: cate.cateSlug,
+          description: cate.description,
+          courses,
+          createdAt: cate.createdAt,
+          updatedAt: cate.updatedAt,
+        };
+      } catch (error) {
+        if (!error) {
+          const error = new Error("Failed to fetch categories!");
+          error.statusCode(422);
+          return error;
+        }
+        next(error);
+      }
+    });
+
     res.status(200).json({
       message: "Fetch categories sucessfully!",
-      categories,
+      categories: await Promise.all(finalCategories),
     });
   } catch (error) {
     if (!error) {
@@ -16,6 +45,7 @@ exports.getCategories = async (req, res, next) => {
       error.statusCode(422);
       return error;
     }
+    next(error);
   }
 };
 
@@ -34,6 +64,7 @@ exports.getCategory = async (req, res, next) => {
       error.statusCode(422);
       return error;
     }
+    next(error);
   }
 };
 
