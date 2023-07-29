@@ -3,15 +3,35 @@ const bcrypt = require("bcryptjs");
 const { deleteFile } = require("../utils/file");
 const { faker } = require("@faker-js/faker");
 const { validationResult } = require("express-validator");
+const { getCoursesOrderByUserId } = require("../utils/helper");
 const customError = require("../utils/error");
+const Order = require("../models/Order");
 
 exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find();
     // console.log("users: ", users);
+
+    const result = users.map(async (user) => {
+      const courses = await getCoursesOrderByUserId(user._id);
+      return {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role,
+        phone: user.phone,
+        address: user.address,
+        payment: user.payment,
+        courses,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+    });
+
     res.status(200).json({
       message: "Fetch users sucessfully!",
-      users,
+      users: await Promise.all(result),
     });
   } catch (error) {
     if (!error) {
@@ -87,21 +107,25 @@ exports.postUser = async (req, res, next) => {
   if (req.file) {
     avatar = req.file.path.replace("\\", "/");
   } else {
-    avatar = "images/user-avatar.jpg";
+    avatar =
+      "https://lwfiles.mycourse.app/64b5524f42f5698b2785b91e-public/avatars/thumbs/64c077e0557e37da3707bb92.jpg";
   }
 
   //   No validate yet!
   try {
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      const error = new customError("Email is already registered", 422);
+      return next(error);
+    }
 
     const newUser = new User({
       email,
       name,
       phone,
       avatar,
-      address,
       role,
-      password: hashedPassword,
     });
     const result = await newUser.save();
 

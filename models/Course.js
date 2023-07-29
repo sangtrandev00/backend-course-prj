@@ -10,6 +10,9 @@ const courseSchema = new Schema(
       required: true,
       index: true,
     },
+    subTitle: {
+      type: String,
+    },
     thumbnail: {
       type: String,
       required: true,
@@ -51,8 +54,25 @@ const courseSchema = new Schema(
     categoryId: {
       type: Schema.Types.ObjectId,
       ref: "Category",
-      required: true,
     },
+    requirements: [
+      {
+        _id: Schema.Types.ObjectId,
+        type: String,
+      },
+    ],
+    willLearns: [
+      {
+        _id: Schema.Types.ObjectId,
+        type: String,
+      },
+    ],
+    tags: [
+      {
+        _id: Schema.Types.ObjectId,
+        type: String,
+      },
+    ],
   },
   { timestamps: true }
 );

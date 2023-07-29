@@ -26,6 +26,9 @@ const lessonSchema = new Schema(
       type: String, // Link youtube
       required: true,
     },
+    videoLength: {
+      type: Number,
+    },
     access: {
       type: String,
       required: true,

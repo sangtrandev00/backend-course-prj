@@ -61,7 +61,7 @@ exports.getSection = async (req, res, next) => {
 };
 
 exports.postSection = async (req, res, next) => {
-  const { sectionId, name, access, description, type, content } = req.body;
+  const { courseId, name, access, description } = req.body;
 
   // console.log(req.files);
 
@@ -70,9 +70,7 @@ exports.postSection = async (req, res, next) => {
 
   try {
     const section = new Section({
-      sectionId,
-      content,
-      type,
+      courseId,
       name,
       access,
       description,

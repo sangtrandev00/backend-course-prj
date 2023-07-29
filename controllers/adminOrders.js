@@ -139,13 +139,27 @@ exports.getOrder = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find().populate("user._id", "_id name avatar email phone");
 
     console.log(orders);
 
+    const result = orders.map((orderItem) => {
+      return {
+        _id: orderItem._id,
+        transaction: orderItem.transaction,
+        totalPrice: orderItem.totalPrice,
+        items: orderItem.items,
+        note: orderItem.note,
+        user: orderItem.user._id,
+        vatFee: orderItem.vatFee,
+        createdAt: orderItem.createdAt,
+        updatedAt: orderItem.updatedAt,
+      };
+    });
+
     res.json({
       message: "fetch all orders successfully!",
-      orders,
+      orders: result,
     });
   } catch (error) {
     if (!error) {

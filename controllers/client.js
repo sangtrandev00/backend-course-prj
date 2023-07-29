@@ -3,8 +3,18 @@ const Course = require("../models/Course");
 const IsLessonDone = require("../models/IsLessonDone");
 const Lesson = require("../models/Lesson");
 const Order = require("../models/Order");
+const Review = require("../models/Review");
 const Section = require("../models/Section");
 const User = require("../models/User");
+const {
+  getProgressOfCourse,
+  generateRandomAiImages,
+  openai,
+  generateRandomCourses,
+} = require("../utils/helper");
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
 // const Category = require('../models/category');
 
 exports.getCategories = async (req, res, next) => {
@@ -74,10 +84,12 @@ exports.updateLessonDoneByUser = async (req, res, next) => {
   const { userId } = req.body;
 
   try {
-    const lessonDoneByUser = await IsLessonDone.find({
+    const lessonDoneByUser = await IsLessonDone.findOne({
       lessonId: lessonId,
       userId: userId,
     });
+
+    console.log(lessonDoneByUser);
 
     if (!lessonDoneByUser) {
       const lessonDone = new IsLessonDone({
@@ -159,7 +171,7 @@ exports.getCourses = async (req, res, next) => {
 
     const courses = await Course.find(query)
       .populate("categoryId", "_id name")
-      .populate("userId", "_id name")
+      .populate("userId", "_id name avatar")
       .skip(skip)
       .limit(_limit || 8)
       .sort({
@@ -193,6 +205,37 @@ exports.getSectionsByCourseId = async (req, res, next) => {
 
     const sectionsOfCourse = await Section.find({ courseId });
 
+    const result = sectionsOfCourse.map(async (section) => {
+      const lessons = await Lesson.find({ sectionId: section._id });
+      const totalVideosLength = lessons.reduce((acc, lesson) => acc + lesson.videoLength, 0);
+      return {
+        ...section._doc,
+        numOfLessons: lessons.length,
+        totalVideosLength,
+      };
+    });
+
+    console.log(result);
+
+    res.status(200).json({
+      message: "Fetch all Sections by course id successfully!",
+      sections: await Promise.all(result),
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch Sections by course id!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+exports.getSectionsByCourseIdEnrolledCourse = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+
+    const sectionsOfCourse = await Section.find({ courseId });
+
     res.status(200).json({
       message: "Fetch all Sections by course id successfully!",
       sections: sectionsOfCourse,
@@ -209,14 +252,81 @@ exports.getSectionsByCourseId = async (req, res, next) => {
 
 exports.getLessonsBySectionId = async (req, res, next) => {
   const { sectionId } = req.params;
+  const userId = req.get("userId");
+
+  console.log(userId);
+  console.log("sectionId: ", sectionId);
 
   try {
     const lessonsOfSection = await Lesson.find({
       sectionId: sectionId,
     });
+
+    // const result = lessonsOfSection.map(async (lessonItem) => {
+    //   const isDone = await IsLessonDone.findOne({
+    //     userId: userId,
+    //     lessonId: lessonItem._id,
+    //   });
+
+    //   return {
+    //     _id: lessonItem._id,
+    //     sectionId: lessonItem.sectionId,
+    //     name: lessonItem.name,
+    //     content: lessonItem.content,
+    //     access: lessonItem.access,
+    //     type: lessonItem.type,
+    //     description: lessonItem.description,
+    //     isDone: Boolean(isDone) ? true : false,
+    //   };
+    // });
+
     res.status(200).json({
       message: "Fetch all lessons of section id successfully!",
       lessons: lessonsOfSection,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch lessons!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getLessonsBySectionIdEnrolledCourse = async (req, res, next) => {
+  const { sectionId } = req.params;
+  const userId = req.get("userId");
+
+  console.log(userId);
+  console.log("sectionId: ", sectionId);
+
+  try {
+    const lessonsOfSection = await Lesson.find({
+      sectionId: sectionId,
+    });
+
+    const result = lessonsOfSection.map(async (lessonItem) => {
+      const isDone = await IsLessonDone.findOne({
+        userId: userId,
+        lessonId: lessonItem._id,
+      });
+
+      return {
+        _id: lessonItem._id,
+        sectionId: lessonItem.sectionId,
+        name: lessonItem.name,
+        content: lessonItem.content,
+        access: lessonItem.access,
+        type: lessonItem.type,
+        description: lessonItem.description,
+        isDone: Boolean(isDone) ? true : false,
+      };
+    });
+
+    res.status(200).json({
+      message: "Fetch all lessons of section id successfully!",
+      lessons: await Promise.all(result),
     });
   } catch (error) {
     if (!error) {
@@ -342,6 +452,7 @@ exports.getCourse = async (req, res, next) => {
     const course = await Course.findById(courseId)
       .populate("categoryId", "_id name")
       .populate("userId", "_id name");
+
     res.status(200).json({
       message: "Fetch single Course successfully!",
       course,
@@ -356,6 +467,204 @@ exports.getCourse = async (req, res, next) => {
   }
 };
 
+exports.getCourseEnrolledByUserId = async (req, res, next) => {
+  const { courseId } = req.params;
+  const userId = req.get("userId");
+
+  try {
+    const course = await Course.findById(courseId)
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name");
+
+    const sectionsOfCourse = await Section.find({
+      courseId,
+    });
+
+    let numOfLesson = 0;
+    let numOfLessonDone = 0;
+
+    let lessonsOfCourse = [];
+
+    for (const section of sectionsOfCourse) {
+      const lessons = await Lesson.find({
+        sectionId: section._id,
+      });
+      lessonsOfCourse.push(lessons);
+    }
+
+    lessonsOfCourse = lessonsOfCourse.flat();
+
+    console.log(lessonsOfCourse);
+
+    for (const lesson of lessonsOfCourse) {
+      const isDone = await IsLessonDone.findOne({
+        userId,
+        lessonId: lesson._id,
+      });
+
+      if (isDone) {
+        numOfLessonDone += 1;
+      }
+    }
+
+    console.log("num of lesson Done: ", numOfLessonDone);
+
+    const result = {
+      ...course._doc,
+      progress: numOfLessonDone / lessonsOfCourse.length,
+    };
+
+    res.status(200).json({
+      message: "Fetch single Course successfully!",
+      course: result,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch Courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getCourseDetail = async (req, res, next) => {
+  const { courseId } = req.params;
+  try {
+    const course = await Course.findById(courseId)
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name");
+
+    const sections = await Section.find({
+      courseId,
+    });
+
+    const lessonsOfCoursePromise = sections.map(async (sectionItem) => {
+      const lessons = await Lesson.find({
+        sectionId: sectionItem._id,
+      });
+
+      return lessons;
+    });
+
+    const lessonsOfCourse = (await Promise.all(lessonsOfCoursePromise)).flat();
+
+    const orders = await Order.find({
+      "items._id": courseId,
+    });
+
+    const numOfStudents = orders.length;
+
+    const totalVideosLength = lessonsOfCourse.reduce((acc, lesson) => acc + lesson.videoLength, 0);
+    // console.log(sections);
+
+    const reviews = await Review.find({ courseId });
+
+    const avgRatingStars =
+      reviews.reduce((acc, review) => acc + review.ratingStar, 0) / reviews.length;
+
+    const result = {
+      id: course._id,
+      name: course.name,
+      price: course.price,
+      finalPrice: course.finalPrice,
+      thumbnail: course.thumbnail,
+      access: course.access,
+      views: course.views,
+      description: course.description,
+      categoryId: {
+        _id: course.categoryId._id,
+        name: course.categoryId.name,
+      },
+      userId: {
+        _id: course.userId._id,
+        name: course.userId.name,
+      },
+      courseSlug: course.courseSlug,
+      level: course.level,
+      sections: sections.length,
+      lessons: lessonsOfCourse.length,
+      students: numOfStudents,
+      totalVideosLength,
+      numOfReviews: reviews.length,
+      avgRatingStars: avgRatingStars || 0,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+    };
+
+    res.status(200).json({
+      message: "Fetch single Course successfully!",
+      course: result,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch Courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getUserDetail = async (req, res, next) => {
+  const { userId } = req.params;
+
+  console.log(userId);
+
+  try {
+    const user = await User.findById(userId);
+
+    const courses = await Order.find({
+      "user._id": userId,
+    })
+      .select("items")
+      .populate("items._id");
+
+    // .populate("categoryId", "_id name")
+    // .populate("userId", "_id name");
+
+    const coursesEnrolled = courses
+      .map((courseItem) => {
+        return courseItem.items;
+      })
+      .flat()
+      .map((item) => item._id)
+      .map(async (courseItem) => {
+        const progress = (await getProgressOfCourse(courseItem._id, userId)).progress;
+        const totalVideosLengthDone = (await getProgressOfCourse(courseItem._id, userId))
+          .totalVideosLengthDone;
+        const user = await User.findById(userId);
+
+        return {
+          ...courseItem._doc,
+          userId: {
+            _id: user._id,
+            name: user.name,
+            avatar: user.avatar,
+          },
+          progress: progress,
+          totalVideosLengthDone,
+        };
+      });
+
+    const result = {
+      ...user._doc,
+      courses: await Promise.all(coursesEnrolled),
+    };
+
+    res.status(200).json({
+      message: "Fetch User Detail with fully data successfully!",
+      user: result,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch Courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
 exports.getCoursesOrderedByUser = async (req, res, next) => {
   const { userId } = req.params;
 
@@ -385,6 +694,30 @@ exports.getCoursesOrderedByUser = async (req, res, next) => {
   } catch (error) {
     if (!error) {
       const error = new Error("Failed to fetch Courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.checkLessonDoneUserId = async (req, res, next) => {
+  const { lessonId } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const lessonFound = await IsLessonDone.findOne({
+      lessonId: lessonId,
+      userId: userId,
+    });
+
+    res.status(200).json({
+      message: "Check lesson done successfully!",
+      lesson: lessonFound,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to check Lesson Done!");
       error.statusCode(422);
       return error;
     }
@@ -468,12 +801,16 @@ exports.getOrder = async (req, res, next) => {
 exports.getUser = async (req, res, next) => {
   const { userId } = req.params;
 
-  console.log("id: ", userId);
+  // console.log("id: ", userId);
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select("_id name avatar email");
 
-    console.log(user);
+    const lessonDoneList = await IsLessonDone.find({
+      userId: userId,
+    });
+
+    console.log(lessonDoneList);
 
     res.status(200).json({
       message: "fetch single user successfully!",
@@ -489,10 +826,157 @@ exports.getUser = async (req, res, next) => {
   }
 };
 
+exports.postReview = async (req, res, next) => {
+  const { courseId, title, content, ratingStar, orderId } = req.body;
+
+  console.log("req.body: ", req.body);
+
+  try {
+    const newReview = new Review({
+      courseId,
+      title,
+      content,
+      ratingStar,
+      orderId,
+    });
+
+    const result = await newReview.save();
+
+    res.status(200).json({
+      message: "Post review successfully!",
+      review: result,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to post course review!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getCourseReviews = async (req, res, next) => {
+  const { courseId } = req.params;
+
+  console.log("course Id: ", courseId);
+
+  try {
+    const reviews = await Review.find({ courseId });
+
+    res.status(200).json({
+      message: "Fetch reviews successfully!",
+      reviews,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to post course review!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
 exports.updateUser = async (req, res, next) => {};
 
+// Retrieve to see history to track orders.
 exports.getOrdersByIduser = async (req, res, next) => {};
 
+// List all of orders at db
 exports.getOrders = async (req, res, next) => {};
 
+// GET all invoice
 exports.getInvoices = async (req, res, next) => {};
+
+// POST (GENREATE) CERTIFICATIONS
+
+exports.postCertification = async (req, res, next) => {
+  const { userName, courseName, completionDate } = req.body;
+
+  // Load the certificate template
+  // "images/certificate-template.pdf"
+  const certificateTemplatePath = path.join("images", "certificate-template.png");
+  const certifcationName = `${userName}-certificate.pdf`;
+  const outputCertification = path.join("images", certifcationName);
+  const outputPath = `certificates/${userName}-certificate.pdf`;
+
+  // Create a new PDF document
+  const doc = new PDFDocument({ layout: "landscape" });
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "attachment", 'inline; filename="' + certifcationName + '"');
+
+  // Pipe the PDF content to a writable stream (save it to a file)
+  const writeStream = fs.createWriteStream(outputCertification);
+  doc.pipe(writeStream);
+
+  // Load the certificate template
+  doc.image(certificateTemplatePath, 0, 0, { width: 792, height: 612 });
+
+  // Function to center text horizontally
+  const centerTextX = (text) => (doc.page.width - doc.widthOfString(text)) / 2;
+
+  // Function to center text vertically with a top margin
+  const centerTextY = (text) => doc.page.height / 2 + doc.heightOfString(text) / 2 - 10; // Adjust the top margin here
+
+  // Add the user's name, course name, and completion date with technology-themed styling
+  doc
+    .fontSize(48)
+    .fillColor("#007BFF")
+    .text(userName, centerTextX(userName), centerTextY(userName));
+  doc.fontSize(36).fillColor("#4CAF50").text("Certificate of Completion", { align: "center" });
+  doc.fontSize(28).fillColor("#333").text(courseName, { align: "center" });
+  doc.fontSize(18).fillColor("#555").text("This certificate is awarded to", { align: "center" });
+  doc.fontSize(18).fillColor("#555").text(completionDate, { align: "center" });
+
+  // Finalize the PDF document
+  doc.end();
+
+  // Respond with the generated certificate path
+  res.json({ certificatePath: outputCertification });
+};
+
+exports.getAiImages = async (req, res, next) => {
+  try {
+    const response = await openai.createImage({
+      prompt: "Nodejs advanced thumbnail course",
+      n: 3,
+      size: "256x256",
+    });
+
+    console.log(response.data);
+
+    const image_url = response.data.data[0].url;
+
+    console.log(image_url);
+
+    res.status(200).json({
+      image: image_url,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.generateRandomCourses = async (req, res, next) => {
+  const randomCourses = await generateRandomCourses(10);
+
+  try {
+    for (const course of randomCourses) {
+      const newCourse = new Course(course);
+      await newCourse.save();
+    }
+
+    res.status(200).json({
+      courses: randomCourses,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to generate random courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};

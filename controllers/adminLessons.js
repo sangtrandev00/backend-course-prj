@@ -3,6 +3,7 @@ const Category = require("../models/Category");
 const Lesson = require("../models/Lesson");
 const { deleteFile } = require("../utils/file");
 const { validationResult } = require("express-validator");
+const IsLessonDone = require("../models/IsLessonDone");
 
 exports.getLessons = async (req, res, next) => {
   try {
@@ -62,7 +63,8 @@ exports.getLesson = async (req, res, next) => {
 };
 
 exports.postLesson = async (req, res, next) => {
-  const { sectionId, name, icon, description, type, content, access, password } = req.body;
+  const { sectionId, name, icon, description, type, content, access, password, videoLength } =
+    req.body;
 
   console.log(req.files);
 
@@ -78,6 +80,7 @@ exports.postLesson = async (req, res, next) => {
       content,
       access,
       type,
+      videoLength,
     });
 
     const response = await lesson.save();

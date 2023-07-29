@@ -204,7 +204,7 @@ exports.adminLogin = async (req, res, next) => {
     console.log(role);
 
     // Authorization
-    if (role !== "admin" && role !== "subadmin") {
+    if (role !== "ADMIN" && role !== "INSTRUCTOR") {
       const error = new Error("Could not authenticate because this account not admin role!");
       error.statusCode = 422;
       throw error;
