@@ -84,4 +84,26 @@ router.get("/genrate-ai-images", clientController.getAiImages);
 // GENREATE AI IMAGES
 router.get("/genrate-random-courses", clientController.generateRandomCourses);
 
+// GENERATE UNSPLASH IMAGES
+
+router.get("/get-unsplash-images", clientController.getImagesFromUnsplash);
+
+// GENERATE SECTIONS OUTLINE
+router.get("/generate-outline-course", clientController.generateOutlineCourse);
+
+// CREATE OUTLINE COURSE AND SAVE AT DB
+router.post("/create-outline-course", clientController.createOutlineCourse);
+
+// GENERATE LESSONS BASE ON OUTLINE
+router.get("/generate-lesson-of-outline", clientController.generateLessonOfOutline);
+
+// CREATE LESSONS AND SAVE AT DB BASE ON OUTLINE
+router.post("/create-lessons-of-outline-course", clientController.createLessonsOfOutlineCourse);
+
+// GENERATE WHOLE COURSE
+router.get("/generate-whole-course", clientController.generateTheWholeCourse);
+
+// GENERATE WHOLE COURSE
+router.post("/create-whole-course", clientController.createTheWholeCourse);
+
 module.exports = router;

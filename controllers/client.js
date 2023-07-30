@@ -6,15 +6,21 @@ const Order = require("../models/Order");
 const Review = require("../models/Review");
 const Section = require("../models/Section");
 const User = require("../models/User");
+const axios = require("axios");
+
 const {
   getProgressOfCourse,
   generateRandomAiImages,
   openai,
   generateRandomCourses,
+  generateSectionsName,
+  createOutline,
 } = require("../utils/helper");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
+const { UNSPLASH_API_KEY } = require("../config/constant");
+const { searchYouTubeVideos } = require("../utils/youtube");
 // const Category = require('../models/category');
 
 exports.getCategories = async (req, res, next) => {
@@ -804,7 +810,7 @@ exports.getUser = async (req, res, next) => {
   // console.log("id: ", userId);
 
   try {
-    const user = await User.findById(userId).select("_id name avatar email");
+    const user = await User.findById(userId).select("_id name avatar email phone");
 
     const lessonDoneList = await IsLessonDone.find({
       userId: userId,
@@ -959,6 +965,33 @@ exports.getAiImages = async (req, res, next) => {
   }
 };
 
+exports.getImagesFromUnsplash = async (req, res, next) => {
+  try {
+    const response = await axios.get("https://api.unsplash.com/search/photos", {
+      params: {
+        query: "Machine Learning",
+        orientation: "landscape",
+        client_id: UNSPLASH_API_KEY,
+        per_page: 10,
+      },
+    });
+
+    const randomIndex = Math.floor(Math.random() * response.data.results.length);
+
+    res.status(200).json({
+      message: "Fetch images from unsplash successfully!",
+      response: response.data.results[randomIndex].urls.regular,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to get images from unsplash!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
 exports.generateRandomCourses = async (req, res, next) => {
   const randomCourses = await generateRandomCourses(10);
 
@@ -974,6 +1007,222 @@ exports.generateRandomCourses = async (req, res, next) => {
   } catch (error) {
     if (!error) {
       const error = new Error("Failed to generate random courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.createOutlineCourse = async (req, res, next) => {
+  const { courseId } = req.body;
+
+  try {
+    const response = await createOutline(courseId);
+
+    res.status(200).json({
+      message: "Successfully to create outline course!",
+      response,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.generateOutlineCourse = async (req, res, next) => {
+  try {
+    const outline = await generateSectionsName("64c5d873c573c1ec5d4a1907");
+
+    res.status(200).json({
+      message: "Successfully to generate outline course!",
+      outline: outline,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to generate random courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.generateLessonOfOutline = async (req, res, next) => {
+  try {
+    const outline = await generateSectionsName("64c5d873c573c1ec5d4a18f5");
+
+    const lessons = [];
+
+    for (const sectionName of outline) {
+      const currentLessons = await searchYouTubeVideos(sectionName);
+      lessons.push(currentLessons);
+    }
+
+    res.status(200).json({
+      message: "Successfully to generate lesson base on outline!",
+      lessons,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to generate youtube videos and descriptions,... !");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.createLessonsOfOutlineCourse = async (req, res, next) => {
+  const { courseId } = req.body;
+  try {
+    const outline = await Section.find({ courseId });
+
+    const lessons = [];
+
+    for (const sectionItem of outline) {
+      // Search youtube video base on query.
+      const currentYoutubeVideos = await searchYouTubeVideos(sectionItem.name);
+
+      const currSectionId = sectionItem._id;
+
+      const newLessons = currentYoutubeVideos.map((video) => {
+        return {
+          sectionId: currSectionId,
+          name: video.title,
+          content: video.link,
+          description: video.title,
+          access: "PAID",
+          type: "video",
+          videoLength: video.videoLength,
+        };
+      });
+
+      const createdLessons = await Lesson.insertMany(newLessons);
+      lessons.push(createdLessons);
+    }
+
+    res.status(200).json({
+      message: "Successfully to create lessons base on outline!",
+      lessons: lessons.flat(),
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to generate youtube videos and descriptions,... !");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.generateTheWholeCourse = async (req, res, next) => {
+  const courseId = "64c5d873c573c1ec5d4a18f5";
+
+  try {
+    const outline = await generateSectionsName(courseId);
+
+    // const sectionsCreatedcc = await Section.insertMany(outline);
+
+    const lessons = [];
+
+    for (const sectionName of outline) {
+      // Search youtube video base on query.
+      const currentYoutubeVideos = await searchYouTubeVideos(sectionName);
+
+      // const currSectionId = sectionItem._id;
+
+      const newLessons = currentYoutubeVideos.map((video) => {
+        return {
+          sectionId: "sdjfkldsjfklsdjfkldsjfkdsljf",
+          name: video.title,
+          content: video.link,
+          description: video.title,
+          access: "PAID",
+          type: "video",
+          videoLength: video.videoLength,
+        };
+      });
+
+      // const createdLessons = await Lesson.insertMany(newLessons);
+      lessons.push(newLessons);
+    }
+
+    const newCourse = {
+      courseId,
+      sections: outline,
+      lessons: lessons.flat(),
+    };
+
+    res.status(200).json({
+      message: "Successfully to generate the whole course with course id",
+      courseCreated: newCourse,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to generate the whole course with course id");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.createTheWholeCourse = async (req, res, next) => {
+  const { courseId } = req.body;
+
+  console.log(courseId);
+
+  try {
+    const sectionNameList = await generateSectionsName(courseId);
+    const outline = sectionNameList.map((sectionName, index) => {
+      return {
+        courseId,
+        name: `Section ${String(index + 1).padStart(2, "0")}: ${sectionName}`,
+        access: "PAID", // Adjust the access type as needed
+        description: sectionName, // Add a description for each section if required
+      };
+    });
+    const sectionsCreated = await Section.insertMany(outline);
+
+    const sectionsFound = await Section.find({ courseId });
+
+    const lessons = [];
+
+    for (const sectionItem of sectionsFound) {
+      // Search youtube video base on query.
+      const currentYoutubeVideos = await searchYouTubeVideos(sectionItem.name);
+
+      const currSectionId = sectionItem._id;
+
+      const newLessons = currentYoutubeVideos.map((video) => {
+        return {
+          sectionId: currSectionId,
+          name: video.title,
+          content: video.link,
+          description: video.title,
+          access: "PAID",
+          type: "video",
+          videoLength: video.videoLength,
+        };
+      });
+
+      const createdLessons = await Lesson.insertMany(newLessons);
+      lessons.push(createdLessons);
+    }
+
+    const newCourse = {
+      courseId,
+      sections: outline,
+      lessons: lessons.flat(),
+    };
+
+    res.status(200).json({
+      message: "Successfully to generate the whole course with course id",
+      courseCreated: newCourse,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to generate the whole course with course id");
       error.statusCode(422);
       return error;
     }

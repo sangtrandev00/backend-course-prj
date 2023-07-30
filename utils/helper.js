@@ -8,10 +8,14 @@ const mongoose = require("mongoose");
 const { courseNames } = require("./fakerData");
 const slugify = require("slugify");
 const { faker } = require("@faker-js/faker");
-const myApiKey = "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";
-
+// const myApiKey = "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";
+const fs = require("fs");
+const path = require("path");
+const axios = require("axios");
+const { UNSPLASH_API_KEY, OPEN_AI_KEY } = require("../config/constant");
+const { BACKEND_URL } = require("../config/backend-domain");
 const configuration = new Configuration({
-  apiKey: myApiKey,
+  apiKey: OPEN_AI_KEY,
 });
 const openai = new OpenAIApi(configuration);
 exports.openai = openai;
@@ -125,35 +129,6 @@ exports.generateRandomCoursesFakerjs = (numCourses) => {
   return courses;
 };
 
-exports.generateRandomSections = async () => {};
-
-exports.generateRandomAiImages = async () => {};
-
-// Function to generate random course descriptions using OpenAI API
-// const generateCourseDescriptions = async (numCourses) => {
-//   const courseDescriptions = [];
-//   for (let i = 0; i < numCourses; i++) {
-//     try {
-//       const promptCourseIdx = courseNames[Math.floor(Math.random() * courseNames.length)];
-//       const prompt = `Generate a course description for the course "${promptCourseIdx}".`;
-//       const response = await openai.createCompletion({
-//         model: "text-davinci-003", // Choose an appropriate engine
-//         prompt,
-//         max_tokens: 100, // Adjust the length of the generated description
-//         n: 1,
-//         temperature: 0.6,
-//       });
-//       const description = response.data.choices[0].text.trim();
-//       courseDescriptions.push(description);
-//     } catch (error) {
-//       console.log("Error generating description:", error);
-//       // If there's an error, you can provide a fallback or placeholder description.
-//       courseDescriptions.push("Description not available.");
-//     }
-//   }
-//   return courseDescriptions;
-// };
-
 const generateCourseDescriptionByCourseName = async (courseName) => {
   try {
     console.log("course name: ", courseName);
@@ -175,6 +150,58 @@ const generateCourseDescriptionByCourseName = async (courseName) => {
   }
 };
 
+const sanitizeFileName = (fileName) => {
+  // Replace invalid characters with an underscore
+  return fileName.replace(/[/\\?%*:|"<>]/g, "_");
+};
+
+const generateThumbnailFromAi = async (courseName) => {
+  try {
+    const response = await openai.createImage({
+      prompt: `${courseName} thumbnail course`,
+      n: 1,
+      size: "512x512",
+    });
+    const imageUrl = response.data.data[0].url;
+
+    // Extract the image file name from the URL
+    const parsedUrl = new URL(imageUrl);
+    const imageFileName = path.basename(parsedUrl.pathname);
+
+    console.log("image file name: " + imageFileName);
+
+    // Sanitize the course name for use as a file name
+    const sanitizedCourseName = sanitizeFileName(courseName);
+    const imagePath = path.join(
+      __dirname,
+      "..",
+      "images",
+      `${sanitizedCourseName}-${imageFileName}`
+    );
+
+    // Download the image using Axios
+    const imageResponse = await axios.get(imageUrl, { responseType: "stream" });
+
+    // Create a write stream to save the image
+    const writer = fs.createWriteStream(imagePath);
+    imageResponse.data.pipe(writer);
+
+    return new Promise((resolve, reject) => {
+      writer.on("finish", () => {
+        const imageUrlForFrontend = `${BACKEND_URL}/images/${sanitizedCourseName}-${imageFileName}`;
+        resolve(imageUrlForFrontend);
+      });
+      writer.on("error", reject);
+    });
+
+    return imagePath;
+  } catch (error) {
+    console.log("Error generating thumbnail:", error);
+    // If there's an error, you can provide a fallback thumbnail URL.
+    return faker.image.urlLoremFlickr({ category: courseName });
+  }
+};
+
 // Function to generate random courses
 exports.generateRandomCourses = async (numCourses) => {
   // const courseDescriptions = await generateCourseDescriptions(numCourses);
@@ -190,19 +217,7 @@ exports.generateRandomCourses = async (numCourses) => {
     const courseName = courseNames[i];
 
     // Generate thumbnail image using OpenAI
-    let thumbnail;
-    try {
-      const response = await openai.createImage({
-        prompt: `${courseName} thumbnail course`,
-        n: 1,
-        size: "512x512",
-      });
-      thumbnail = response.data.data[0].url;
-    } catch (error) {
-      console.log("Error generating thumbnail:", error);
-      // If there's an error, you can provide a fallback thumbnail URL.
-      thumbnail = faker.image.urlLoremFlickr({ category: courseName });
-    }
+    const thumbnail = await generateThumbnailFromAi(courseName);
 
     const price = Math.floor(Math.random() * 50) + 100;
     const description = await generateCourseDescriptionByCourseName(courseName);
@@ -227,3 +242,74 @@ exports.generateRandomCourses = async (numCourses) => {
   }
   return courses;
 };
+
+const generateThumbnailFromUnsplash = async (courseName) => {
+  try {
+    const response = await axios.get("https://api.unsplash.com/search/photos", {
+      params: {
+        query: courseName,
+        orientation: "landscape",
+        client_id: UNSPLASH_API_KEY,
+        per_page: 10,
+      },
+    });
+
+    return response.data.results[0].urls.regular;
+  } catch (error) {
+    console.log("Error generating thumbnail:", error);
+    // If there's an error, you can provide a fallback thumbnail URL.
+    return faker.image.urlLoremFlickr({ category: courseName });
+  }
+};
+
+const createOutline = async (courseId) => {
+  try {
+    // const courseId = "64c5d873c573c1ec5d4a1907"; // Replace with the actual course ID
+
+    const courseSections = await generateSectionsName(courseId);
+
+    console.log("course sections: ", courseSections.length);
+    console.log("course sections: ", courseSections);
+
+    // Generate and save the sections for the course
+    const sections = courseSections.map((sectionName, index) => ({
+      courseId,
+      name: `Section ${String(index + 1).padStart(2, "0")}: ${sectionName}`,
+      access: "PAID", // Adjust the access type as needed
+      description: "", // Add a description for each section if required
+    }));
+
+    const createdSections = await Section.insertMany(sections);
+    console.log("Sections created:", createdSections);
+    return createdSections;
+  } catch (error) {
+    console.log("Error generating outline:", error);
+    return [];
+  }
+};
+
+const generateSectionsName = async (courseId) => {
+  try {
+    const courseName = (await Course.findById(courseId).select("name")).name;
+    console.log("course name: ", courseName);
+    const prompt = `Generate a course outline (curriculum) for the course: "${courseName}". and wrap all the section into an string like this: introduction, type of cyber attack, footerpring, section title, section title,...  .Remember that in each section name not break down the line`;
+    const response = await openai.createCompletion({
+      model: "text-davinci-003", // Choose an appropriate engine
+      prompt,
+      max_tokens: 200, // Adjust the length of the generated description
+      n: 1,
+      temperature: 0.2,
+    });
+    const courseOutline = response.data.choices[0].text.trim().replace(/\\n/g, ""); // Remove '\n' characters;
+    return courseOutline.split(",");
+  } catch (error) {
+    console.log("Error generating courseOutline:", error);
+    // If there's an error, you can provide a fallback or placeholder courseOutline.
+    return "courseSectionName not available.";
+  }
+};
+
+const generateLessonBySectionName = async (outlineOfCourse) => {};
+
+exports.generateSectionsName = generateSectionsName;
+exports.createOutline = createOutline;
