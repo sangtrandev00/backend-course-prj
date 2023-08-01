@@ -5,7 +5,7 @@ const Order = require("../models/Order");
 const Section = require("../models/Section");
 const { Configuration, OpenAIApi } = require("openai");
 const mongoose = require("mongoose");
-const { courseNames } = require("./fakerData");
+const { courseNames, devopsCourses, blockchainCourses } = require("./fakerData");
 const slugify = require("slugify");
 const { faker } = require("@faker-js/faker");
 // const myApiKey = "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";
@@ -212,9 +212,15 @@ exports.generateRandomCourses = async (numCourses) => {
     "64b364203bbbb63172973793",
     "64bb4e1582a5abc6b1c13305",
   ];
+  const backendId = "646781266859a50acfca8e93";
+  const frontendId = "64b363573bbbb6317297378d";
+  const iotId = "64b364203bbbb63172973793";
+  const blockchainId = "64bb4e1582a5abc6b1c13305";
+  const devopsId = "64bb411b19f0935f065b9898";
+
   const courses = [];
   for (let i = 0; i < numCourses; i++) {
-    const courseName = courseNames[i];
+    const courseName = blockchainCourses[i];
 
     // Generate thumbnail image using OpenAI
     const thumbnail = await generateThumbnailFromAi(courseName);
@@ -233,7 +239,8 @@ exports.generateRandomCourses = async (numCourses) => {
       level: "All Level", // You can adjust this based on your requirements
       courseSlug: slugify(courseName, { lower: true, strict: true }), // Generate a unique slug for each course
       userId: "6468a145401d3810494f4797", // You can adjust this based on your requirements
-      categoryId: categoriesIdList[Math.floor(Math.random() * categoriesIdList.length)],
+      // categoryId: categoriesIdList[Math.floor(Math.random() * categoriesIdList.length)],
+      categoryId: blockchainId,
       requirements: [],
       willLearns: [],
       tags: [],

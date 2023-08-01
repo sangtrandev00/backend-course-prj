@@ -41,6 +41,34 @@ exports.getCategories = async (req, res, next) => {
   }
 };
 
+exports.getAuthors = async (req, res, next) => {
+  try {
+    const courses = await Course.find().populate("userId", "_id name");
+
+    const authors = courses.map((course) => course.userId);
+
+    const authorList = [
+      ...new Map(
+        authors.map((author) => {
+          return [author.name, { name: author.name, _id: author._id }];
+        })
+      ),
+    ];
+
+    res.status(200).json({
+      mesasge: "Fetch authors sucessfully!",
+      authors: authorList,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch categories!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
 exports.getCategory = async (req, res, next) => {
   const { categoryId } = req.params;
   try {
@@ -126,66 +154,106 @@ exports.updateLessonDoneByUser = async (req, res, next) => {
   }
 };
 
+const buildQuery = (req) => {
+  const { _q, _min, _max, _author, _level, _price, _topic } = req.query;
+  const query = {};
+
+  if (_q) {
+    query.$text = { $search: _q };
+  }
+
+  if (_level) {
+    console.log(_level);
+
+    query.level = {
+      $in: _level.split(","),
+    };
+  }
+
+  if (_price === "Free") {
+    query.finalPrice = 0;
+  } else if (_price === "Paid") {
+    query.finalPrice = { $gt: 0 };
+  }
+
+  if (_topic) {
+    query.categoryId = { $in: _topic.split(",") };
+  }
+
+  if (_author) {
+    query.userId = {
+      $in: _author.split(","),
+    };
+  }
+
+  if (_min !== undefined || _max !== undefined) {
+    query.$expr = { $and: [] };
+
+    if (_min !== undefined) {
+      query.$expr.$and.push({
+        $gte: [
+          { $multiply: ["$oldPrice", { $subtract: [1, { $divide: ["$discount", 100] }] }] },
+          parseFloat(_min),
+        ],
+      });
+    }
+
+    if (_max !== undefined) {
+      query.$expr.$and.push({
+        $lte: [
+          { $multiply: ["$oldPrice", { $subtract: [1, { $divide: ["$discount", 100] }] }] },
+          parseFloat(_max),
+        ],
+      });
+    }
+  }
+
+  return query;
+};
+
 exports.getCourses = async (req, res, next) => {
-  const { _limit, _sort, _order, _q, _min, _max, _page, _cateIds } = req.query;
-
-  const searchWord = _q;
-
-  const regexPattern = new RegExp(searchWord, "i");
+  const { _limit, _sort, _q, _min, _max, _page, _cateIds } = req.query;
 
   const page = _page || 1;
+
+  console.log("sort: ", _sort);
 
   const skip = (+page - 1) * _limit;
 
   try {
-    const query = {
-      name: regexPattern,
-      // categoryId: {
-      //   $in: categories || allCates,
-      // },
-    };
+    const query = buildQuery(req);
 
-    if (_cateIds) {
-      query.categoryId = {
-        $in: _cateIds.split(","),
-      };
-    }
-
-    if (_min !== undefined || _max !== undefined) {
-      query.$expr = {
-        $and: [],
-      };
-
-      if (_min !== undefined) {
-        query.$expr.$and.push({
-          $gte: [
-            { $multiply: ["$oldPrice", { $subtract: [1, { $divide: ["$discount", 100] }] }] },
-            parseFloat(_min),
-          ],
-        });
-      }
-
-      if (_max !== undefined) {
-        query.$expr.$and.push({
-          $lte: [
-            { $multiply: ["$oldPrice", { $subtract: [1, { $divide: ["$discount", 100] }] }] },
-            parseFloat(_max),
-          ],
-        });
-      }
-    }
-
-    const courses = await Course.find(query)
+    const coursesQuery = Course.find(query, {
+      ...(query.$text && { score: { $meta: "textScore" } }),
+    })
       .populate("categoryId", "_id name")
       .populate("userId", "_id name avatar")
       .skip(skip)
-      .limit(_limit || 8)
-      .sort({
-        [_sort]: _order || "desc",
-      });
+      .limit(_limit || 12);
+
+    if (_sort) {
+      const sortQuery = {
+        ...(query.$text && { score: { $meta: "textScore" } }),
+      };
+
+      if (_sort === "newest") {
+        sortQuery.createdAt = -1;
+      }
+
+      coursesQuery.sort(sortQuery);
+
+      console.log(sortQuery);
+    }
+
+    // .sort({
+    //   [_sort]: _order || "desc",
+    //   // score: { $meta: "textScore" },
+    //   ,
+    // });
 
     const totalCourses = await Course.where(query).countDocuments();
-
+    // const totalCourses = await Course.countDocuments(query);
+    const courses = await coursesQuery;
     res.status(200).json({
       message: "Fetch all Courses successfully!",
       courses,

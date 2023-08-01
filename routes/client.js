@@ -7,6 +7,9 @@ const { check, body } = require("express-validator");
 // GET Courses/
 router.get("/courses", clientController.getCourses);
 
+// GET Authors/
+router.get("/authors", clientController.getAuthors);
+
 // GET Course
 router.get("/courses/:courseId", clientController.getCourse);
 

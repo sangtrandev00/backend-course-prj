@@ -77,5 +77,8 @@ const courseSchema = new Schema(
   { timestamps: true }
 );
 
+//  Define the text index on 'name' and 'description' fields
+courseSchema.index({ name: "text", description: "text" });
+
 //Export the model
 module.exports = mongoose.model("Course", courseSchema);
