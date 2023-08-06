@@ -11,8 +11,11 @@ const router = express.Router();
 // GET CATEGORIES
 router.get("/categories", adminCategoriesController.getCategories);
 
+// GET ALL CATEGORIES
+router.get("/categories", adminCategoriesController.getAllCategories);
+
 // GET CATEGORY
-router.get("/categories/:categoryId", adminCategoriesController.getCategory);
+router.get("/categories/:categoryId/single", adminCategoriesController.getCategory);
 
 // POST CATE
 // Should put the middleware upload multer here at route
@@ -38,14 +41,14 @@ router.put(
   uploadMiddleware.single("cateImage"),
   body("name")
     .isLength({ min: 3 })
-    .withMessage("Please enter a input field category with at least 3 characters.")
-    .custom((value, { req }) => {
-      return Category.findOne({ name: value }).then((categoryDoc) => {
-        if (categoryDoc) {
-          return Promise.reject("Category exists already, please pick a different one.");
-        }
-      });
-    }),
+    .withMessage("Please enter a input field category with at least 3 characters."),
+  // .custom((value, { req }) => {
+  //   return Category.findOne({ name: value }).then((categoryDoc) => {
+  //     if (categoryDoc) {
+  //       return Promise.reject("Category exists already, please pick a different one.");
+  //     }
+  //   });
+  // }),
   adminCategoriesController.updateCategories
 );
 

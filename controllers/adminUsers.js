@@ -142,35 +142,34 @@ exports.postUser = async (req, res, next) => {
 };
 
 exports.updateUser = async (req, res, next) => {
-  const { name, address, oldAvatar, email, phone, role, password } = req.body;
+  const { name, email, phone, role, avatar } = req.body;
   const { userId } = req.params;
   console.log(req.file);
-  console.log("old avatar: ", oldAvatar);
+  // console.log("old avatar: ", oldAvatar);
 
-  let avatar;
-  if (req.file) {
-    avatar = req.file.path.replace("\\", "/");
-  } else {
-    avatar = oldAvatar;
-  }
-  console.log("avatar: ", avatar);
+  // let avatar;
+  // if (req.file) {
+  //   avatar = req.file.path.replace("\\", "/");
+  // } else {
+  //   avatar = oldAvatar;
+  // }
+  // console.log("avatar: ", avatar);
 
   try {
-    const currentUser = await User.findById(userId);
-    console.log("current user: ", currentUser);
-    const hashedPassword = await bcrypt.hash(password, 12);
-    currentUser.name = name;
-    currentUser.address = address;
-    if (oldAvatar !== avatar) {
-      currentUser.avatar = avatar;
-      deleteFile(oldAvatar);
-      console.log("update avatar!");
-    }
-    currentUser.email = email;
-    currentUser.password = hashedPassword;
-    currentUser.phone = phone;
-    currentUser.role = role;
-    const response = await currentUser.save();
+    const updatedUser = await User.findById(userId);
+    // const hashedPassword = await bcrypt.hash(password, 12);
+    updatedUser.name = name;
+    // if (oldAvatar !== avatar) {
+    //   updatedUser.avatar = avatar;
+    //   deleteFile(oldAvatar);
+    //   console.log("update avatar!");
+    // }
+    updatedUser.email = email;
+    // updatedUser.password = hashedPassword;
+    updatedUser.phone = phone;
+    updatedUser.role = role;
+    updatedUser.avatar = avatar;
+    const response = await updatedUser.save();
 
     res.status(200).json({
       message: "Update user succesfully!",
@@ -189,7 +188,7 @@ exports.updateUser = async (req, res, next) => {
 exports.deleteUser = async (req, res, next) => {
   const { userId } = req.params;
   try {
-    const { avatar } = await User.findById(userId);
+    // const { avatar } = await User.findById(userId);
     const response = await User.deleteOne({
       _id: userId,
     });
@@ -199,7 +198,7 @@ exports.deleteUser = async (req, res, next) => {
     });
     // Delete avatar image
 
-    !avatar.startsWith("http") && deleteFile(avatar);
+    // !avatar.startsWith("http") && deleteFile(avatar);
   } catch (error) {
     if (!error) {
       const error = new Error("Failed to fetch categories!");

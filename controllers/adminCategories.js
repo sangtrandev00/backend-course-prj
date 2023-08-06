@@ -3,8 +3,20 @@ const Course = require("../models/Course");
 const { deleteFile } = require("../utils/file");
 const { validationResult } = require("express-validator");
 exports.getCategories = async (req, res, next) => {
+  const { _q } = req.query;
+
+  console.log("query: ", _q);
+
+  const query = {};
+
+  if (_q) {
+    query.$text = { $search: _q };
+  }
+
   try {
-    const categories = await Category.find();
+    const categories = await Category.find(query, {
+      ...(query.$text && { score: { $meta: "textScore" } }),
+    });
     // console.log("categories: ", categories);
 
     const finalCategories = categories.map(async (cate) => {
@@ -42,6 +54,23 @@ exports.getCategories = async (req, res, next) => {
   } catch (error) {
     if (!error) {
       const error = new Error("Failed to fetch categories!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getAllCategories = async (req, res, next) => {
+  try {
+    const categories = await Category.find();
+    res.status(200).json({
+      message: "Fetch all categories sucessfully!",
+      categories,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch all categories!");
       error.statusCode(422);
       return error;
     }
@@ -109,7 +138,7 @@ exports.postCategory = async (req, res, next) => {
 };
 
 exports.updateCategories = async (req, res, next) => {
-  const { name, description, oldImage } = req.body;
+  const { name, description, cateImage, cateSlug } = req.body;
 
   const { categoryId } = req.params;
 
@@ -130,20 +159,22 @@ exports.updateCategories = async (req, res, next) => {
       throw validationError;
     }
 
-    const currentCategory = await Category.findById(categoryId);
-    currentCategory.name = name;
-    currentCategory.description = description;
+    const updatedCategory = await Category.findById(categoryId);
+    updatedCategory.name = name;
+    updatedCategory.description = description;
+    updatedCategory.cateSlug = cateSlug;
+    updatedCategory.cateImage = cateImage;
     // If file is empty get the old one!
-    if (req.file) {
-      console.log(req.file);
-      const cateImage = req.file.path.replace("\\", "/");
-      currentCategory.cateImage = cateImage;
+    // if (req.file) {
+    //   console.log(req.file);
+    //   const cateImage = req.file.path.replace("\\", "/");
+    //   updatedCategory.cateImage = cateImage;
 
-      // Delete the old image
-      deleteFile(oldImage);
-    }
+    //   // Delete the old image
+    //   deleteFile(oldImage);
+    // }
 
-    const response = await currentCategory.save();
+    const response = await updatedCategory.save();
 
     res.status(200).json({
       message: "Update category succesfully!",
@@ -162,7 +193,7 @@ exports.updateCategories = async (req, res, next) => {
 exports.deleteCategory = async (req, res, next) => {
   const { categoryId } = req.params;
   try {
-    const { cateImage } = await Category.findById(categoryId);
+    // const { cateImage } = await Category.findById(categoryId);
     const response = await Category.deleteOne({
       _id: categoryId,
     });
@@ -172,10 +203,10 @@ exports.deleteCategory = async (req, res, next) => {
     });
 
     // delete file when delete cate row
-    deleteFile(cateImage);
+    // deleteFile(cateImage);
   } catch (error) {
     if (!error) {
-      const error = new Error("Failed to fetch categories!");
+      const error = new Error("Failed to delete category by id!");
       error.statusCode(422);
       return error;
     }

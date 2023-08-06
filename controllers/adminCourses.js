@@ -5,20 +5,92 @@ const { deleteFile } = require("../utils/file");
 const { validationResult } = require("express-validator");
 
 exports.getCourses = async (req, res, next) => {
+  const { _q, _page, _limit, _author, _category } = req.query;
+
+  const skip = ((+_page || 1) - 1) * _limit;
+
+  const query = {};
+
+  if (_q) {
+    query.$text = { $search: _q };
+  }
+
+  if (_author) {
+    query.userId = {
+      $in: _author.split(","),
+    };
+  }
+
+  console.log("category: ", _category);
+
+  if (_category && _category !== "all") {
+    query.categoryId = _category;
+  }
+
   try {
-    const courses = await Course.find()
+    const promiseCourses = Course.find(query, {
+      ...(query.$text && { score: { $meta: "textScore" } }),
+    })
       .populate("categoryId", "_id name")
       .populate("userId", "_id name avatar");
     // courses will now contain the desired result with specific fields from the referenced documents
 
-    // Map here to create beautiful course
+    let courses = [];
+    if (_limit && _page) {
+      courses = await promiseCourses.skip(skip).limit(_limit);
+    } else {
+      courses = await promiseCourses;
+    }
+
+    const totalCourses = await Course.where(query).countDocuments();
+
+    const pagination = {
+      _page: +_page || 1,
+      _limit: +_limit || 8,
+      _totalRows: totalCourses,
+    };
+
     res.status(200).json({
       message: "Fetch all Courses successfully!",
       courses: courses,
+      pagination,
     });
   } catch (error) {
     if (!error) {
       const error = new Error("Failed to fetch Courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getAllCourses = async (req, res, next) => {
+  const { _q } = req.query;
+
+  const query = {};
+
+  if (_q) {
+    query.$text = { $search: _q };
+  }
+
+  try {
+    const courses = await Course.find(query, {
+      ...(query.$text && { score: { $meta: "textScore" } }),
+    })
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name avatar");
+
+    res.status(200).json({
+      message: "Fetch all Courses successfully!",
+      courses,
+      pagination: {
+        _totalRows: courses.length,
+      },
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch all courses");
       error.statusCode(422);
       return error;
     }
