@@ -14,6 +14,7 @@ const path = require("path");
 const axios = require("axios");
 const { UNSPLASH_API_KEY, OPEN_AI_KEY } = require("../config/constant");
 const { BACKEND_URL } = require("../config/backend-domain");
+const Review = require("../models/Review");
 const configuration = new Configuration({
   apiKey: OPEN_AI_KEY,
 });
@@ -320,3 +321,107 @@ const generateLessonBySectionName = async (outlineOfCourse) => {};
 
 exports.generateSectionsName = generateSectionsName;
 exports.createOutline = createOutline;
+
+exports.getCourseDetailInfo = async (courseId) => {
+  try {
+    const course = await Course.findById(courseId)
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name");
+
+    const sections = await Section.find({
+      courseId,
+    });
+
+    const lessonsOfCoursePromise = sections.map(async (sectionItem) => {
+      const lessons = await Lesson.find({
+        sectionId: sectionItem._id,
+      });
+
+      return lessons;
+    });
+
+    const lessonsOfCourse = (await Promise.all(lessonsOfCoursePromise)).flat();
+
+    const orders = await Order.find({
+      "items._id": courseId,
+    });
+
+    const numOfStudents = orders.length;
+
+    const totalVideosLength = lessonsOfCourse.reduce((acc, lesson) => acc + lesson.videoLength, 0);
+    // console.log(sections);
+
+    const reviews = await Review.find({ courseId });
+
+    const avgRatingStars =
+      reviews.reduce((acc, review) => acc + review.ratingStar, 0) / reviews.length;
+
+    const result = {
+      _id: course._id,
+      name: course.name,
+      price: course.price,
+      finalPrice: course.finalPrice,
+      thumbnail: course.thumbnail,
+      access: course.access,
+      views: course.views,
+      description: course.description,
+      categoryId: {
+        _id: course.categoryId._id,
+        name: course.categoryId.name,
+      },
+      userId: {
+        _id: course.userId._id,
+        name: course.userId.name,
+      },
+      courseSlug: course.courseSlug,
+      level: course.level,
+      sections: sections.length,
+      lessons: lessonsOfCourse.length,
+      students: numOfStudents,
+      totalVideosLength,
+      numOfReviews: reviews.length,
+      avgRatingStars: avgRatingStars || 0,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+    };
+
+    return result;
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch Courses!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getCoursesOrderedByUserInfo = async (userId) => {
+  try {
+    const courses = await Order.find({
+      "user._id": userId,
+    })
+      .select("items")
+      .populate("items._id");
+
+    // .populate("categoryId", "_id name")
+    // .populate("userId", "_id name");
+
+    const results = courses
+      .map((courseItem) => {
+        return courseItem.items;
+      })
+      .flat()
+      .map((item) => item._id);
+
+    return results;
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch Courses!");
+      error.statusCode(422);
+      return error;
+    }
+
+    return [];
+  }
+};

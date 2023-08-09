@@ -15,6 +15,8 @@ const {
   generateRandomCourses,
   generateSectionsName,
   createOutline,
+  getCourseDetailInfo,
+  getCoursesOrderedByUserInfo,
 } = require("../utils/helper");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
@@ -212,7 +214,7 @@ const buildQuery = (req) => {
 };
 
 exports.getCourses = async (req, res, next) => {
-  const { _limit, _sort, _q, _min, _max, _page, _cateIds } = req.query;
+  const { _limit, _sort, _q, _min, _max, _page, _cateIds, userId } = req.query;
 
   const page = _page || 1;
 
@@ -245,18 +247,26 @@ exports.getCourses = async (req, res, next) => {
       console.log(sortQuery);
     }
 
-    // .sort({
-    //   [_sort]: _order || "desc",
-    //   // score: { $meta: "textScore" },
-    //   ,
-    // });
-
     const totalCourses = await Course.where(query).countDocuments();
     // const totalCourses = await Course.countDocuments(query);
     const courses = await coursesQuery;
+    const coursesOfUser = await getCoursesOrderedByUserInfo(userId);
+    const courseIdOfUserList = coursesOfUser.map((course) => course._id.toString());
+
+    const result = [];
+
+    for (const course of courses) {
+      const courseItem = {
+        ...course._doc,
+
+        isBought: courseIdOfUserList.includes(course._id.toString()) ? true : false,
+      };
+      result.push(courseItem);
+    }
+
     res.status(200).json({
       message: "Fetch all Courses successfully!",
-      courses,
+      courses: result,
       pagination: {
         _page: +_page || 1,
         _limit: +_limit || 12,
@@ -266,6 +276,162 @@ exports.getCourses = async (req, res, next) => {
   } catch (error) {
     if (!error) {
       const error = new Error("Failed to fetch Courses!");
+      error.statusCode = 422;
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getCoursesAfterLogin = async (req, res, next) => {
+  const { _limit, _sort, _q, _min, _max, _page, _cateIds, userId } = req.query;
+
+  const page = _page || 1;
+
+  console.log("sort: ", _sort);
+
+  const skip = (+page - 1) * _limit;
+
+  try {
+    const query = buildQuery(req);
+
+    const coursesQuery = Course.find(query, {
+      ...(query.$text && { score: { $meta: "textScore" } }),
+    })
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name avatar")
+      .skip(skip)
+      .limit(_limit || 12);
+
+    if (_sort) {
+      const sortQuery = {
+        ...(query.$text && { score: { $meta: "textScore" } }),
+      };
+
+      if (_sort === "newest") {
+        sortQuery.createdAt = -1;
+      }
+
+      coursesQuery.sort(sortQuery);
+
+      console.log(sortQuery);
+    }
+
+    const totalCourses = await Course.where(query).countDocuments();
+    // const totalCourses = await Course.countDocuments(query);
+    const courses = await coursesQuery;
+
+    // Get courses of users
+
+    const coursesOfUser = await getCoursesOrderedByUserInfo(userId);
+
+    const courseIdOfUserList = coursesOfUser.map((course) => course._id.toString());
+
+    const result = [];
+
+    for (const course of courses) {
+      const courseItem = {
+        ...course._doc,
+
+        isBought: courseIdOfUserList.includes(course._id.toString()) ? true : false,
+      };
+      result.push(courseItem);
+    }
+
+    res.status(200).json({
+      message: "Fetch all Courses successfully!",
+      courses: result,
+      pagination: {
+        _page: +_page || 1,
+        _limit: +_limit || 12,
+        _totalRows: totalCourses,
+      },
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch Courses!");
+      error.statusCode = 422;
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getPopularCourses = async (req, res, next) => {
+  const { _limit } = req.query;
+
+  try {
+    const coursePopularity = await Order.aggregate([
+      { $unwind: "$items" }, // Unwind the items array
+      { $group: { _id: "$items._id", count: { $sum: 1 } } }, // Group and count course occurrences
+      { $sort: { count: -1 } }, // Sort by count in descending order
+      { $limit: +_limit || 10 }, // Limit the result to the top 10 courses, adjust as needed
+    ]);
+
+    const popularCourseIds = coursePopularity.map((entry) => entry._id);
+
+    // Fetch course details using the popular IDs
+    const popularCourses = await Course.find({ _id: { $in: popularCourseIds } })
+      .populate("categoryId", "_id name")
+      .populate("userId", "_id name avatar");
+
+    res.status(200).json({
+      message: "Fetch all popular Courses successfully!",
+      courses: popularCourses,
+      coursePopularity,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch popular Courses!");
+      error.statusCode = 422;
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.retrieveCartByIds = async (req, res, next) => {
+  const { _courseIds } = req.query;
+
+  console.log("courseId: ", _courseIds);
+
+  try {
+    const courses = await Course.find({
+      _id: { $in: _courseIds.split(",") },
+    }).select("_id name finalPrice thumbnail userId level");
+
+    const totalPrice = courses.reduce((acc, course) => acc + course.finalPrice, 0);
+
+    const result = [];
+
+    for (const course of courses) {
+      const courseDetailInfo = await getCourseDetailInfo(course._id);
+
+      const cartItem = {
+        _id: courseDetailInfo._id,
+        name: courseDetailInfo.name,
+        thumbnail: courseDetailInfo.thumbnail,
+        finalPrice: courseDetailInfo.finalPrice,
+        level: courseDetailInfo.level,
+        userId: courseDetailInfo.userId,
+        numOfReviews: courseDetailInfo.numOfReviews,
+        totalVideosLength: courseDetailInfo.totalVideosLength,
+        avgRatingStars: courseDetailInfo.avgRatingStars,
+        lessons: courseDetailInfo.lessons,
+      };
+      result.push(cartItem);
+    }
+
+    res.status(200).json({
+      message: "Fetch  cart by course ids list successfully!",
+      cart: {
+        items: result,
+        totalPrice: totalPrice,
+      },
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to retrieve cart from database");
       error.statusCode = 422;
       return error;
     }
@@ -605,67 +771,7 @@ exports.getCourseEnrolledByUserId = async (req, res, next) => {
 exports.getCourseDetail = async (req, res, next) => {
   const { courseId } = req.params;
   try {
-    const course = await Course.findById(courseId)
-      .populate("categoryId", "_id name")
-      .populate("userId", "_id name");
-
-    const sections = await Section.find({
-      courseId,
-    });
-
-    const lessonsOfCoursePromise = sections.map(async (sectionItem) => {
-      const lessons = await Lesson.find({
-        sectionId: sectionItem._id,
-      });
-
-      return lessons;
-    });
-
-    const lessonsOfCourse = (await Promise.all(lessonsOfCoursePromise)).flat();
-
-    const orders = await Order.find({
-      "items._id": courseId,
-    });
-
-    const numOfStudents = orders.length;
-
-    const totalVideosLength = lessonsOfCourse.reduce((acc, lesson) => acc + lesson.videoLength, 0);
-    // console.log(sections);
-
-    const reviews = await Review.find({ courseId });
-
-    const avgRatingStars =
-      reviews.reduce((acc, review) => acc + review.ratingStar, 0) / reviews.length;
-
-    const result = {
-      id: course._id,
-      name: course.name,
-      price: course.price,
-      finalPrice: course.finalPrice,
-      thumbnail: course.thumbnail,
-      access: course.access,
-      views: course.views,
-      description: course.description,
-      categoryId: {
-        _id: course.categoryId._id,
-        name: course.categoryId.name,
-      },
-      userId: {
-        _id: course.userId._id,
-        name: course.userId.name,
-      },
-      courseSlug: course.courseSlug,
-      level: course.level,
-      sections: sections.length,
-      lessons: lessonsOfCourse.length,
-      students: numOfStudents,
-      totalVideosLength,
-      numOfReviews: reviews.length,
-      avgRatingStars: avgRatingStars || 0,
-      createdAt: course.createdAt,
-      updatedAt: course.updatedAt,
-    };
-
+    const result = await getCourseDetailInfo(courseId);
     res.status(200).json({
       message: "Fetch single Course successfully!",
       course: result,
@@ -745,25 +851,11 @@ exports.getCoursesOrderedByUser = async (req, res, next) => {
   console.log(userId);
 
   try {
-    const courses = await Order.find({
-      "user._id": userId,
-    })
-      .select("items")
-      .populate("items._id");
-
-    // .populate("categoryId", "_id name")
-    // .populate("userId", "_id name");
-
-    const results = courses
-      .map((courseItem) => {
-        return courseItem.items;
-      })
-      .flat()
-      .map((item) => item._id);
+    const courses = await getCoursesOrderedByUserInfo(userId);
 
     res.status(200).json({
       message: "Fetch Courses by user have ordered successfully!",
-      courses: results,
+      courses: courses,
     });
   } catch (error) {
     if (!error) {

@@ -1,4 +1,5 @@
-// const BACKEND_URL = ""; // Haven't deployed yet!
+// Production mode
+// const BACKEND_URL = `https://backend-course-project-7bc2.onrender.com`;
 
 const BACKEND_URL = "http://localhost:9000"; // Development mode!!!
 
