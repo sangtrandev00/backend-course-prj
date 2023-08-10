@@ -845,6 +845,7 @@ exports.getUserDetail = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.getCoursesOrderedByUser = async (req, res, next) => {
   const { userId } = req.params;
 

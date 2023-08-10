@@ -38,6 +38,9 @@ const userSchema = new Schema(
       type: String,
       default: "COD",
     },
+    lastLogin: {
+      type: Date,
+    },
     resetToken: String,
     resetTokenExpiration: Date,
     loginToken: String,

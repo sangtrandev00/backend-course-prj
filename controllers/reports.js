@@ -7,6 +7,7 @@ const { validationResult } = require("express-validator");
 const IsLessonDone = require("../models/IsLessonDone");
 const User = require("../models/User");
 const Order = require("../models/Order");
+const { getProgressOfCourse, getCourseDetailInfo } = require("../utils/helper");
 
 exports.getSummaryReports = async (req, res, next) => {
   // Get the current date
@@ -253,6 +254,114 @@ exports.getNewUserSignupsList = async (req, res, next) => {
   } catch (error) {
     if (!error) {
       const error = new Error("Failed to fetch users new signup");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getReportsUserProgress = async (req, res, next) => {
+  try {
+    const users = await User.find();
+
+    const result = [];
+
+    for (const user of users) {
+      const lastEnrollment = await Order.find({ "user._id": user._id })
+        .sort({ createdAt: -1 })
+        .limit(1);
+
+      const orders = await Order.find({ "user._id": user._id });
+
+      const userCourses = orders.reduce((courses, order) => {
+        return courses.concat(order.items);
+      }, []);
+
+      let studyTime = 0;
+      const completedCourses = [];
+      for (const course of userCourses) {
+        const { progress, totalVideosLengthDone } = await getProgressOfCourse(course._id, user._id);
+        studyTime += totalVideosLengthDone;
+        if (progress === 1) {
+          completedCourses.push(course);
+        }
+      }
+
+      const userReportItem = {
+        _id: user._id,
+        name: user.name,
+        role: user.role,
+        registerd: user.createdAt,
+        lastLogin: user.lastLogin, // Change later
+        lastEnrollment: lastEnrollment[0]?.createdAt || null,
+        studyTime: studyTime,
+        totalTimeOnPlatform: 80000,
+        allCourses: userCourses.length,
+        completedCourses: completedCourses.length,
+        inCompletedCourses: userCourses.length - completedCourses.length,
+        certificates: completedCourses.length,
+        avgScore: 0,
+      };
+
+      result.push(userReportItem);
+    }
+
+    res.status(200).json({
+      message: "Successfully to get reports of user progress",
+      reports: result,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch reports of user progress");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getReportsCourseInsights = async (req, res, next) => {
+  try {
+    const courses = await Course.find();
+
+    const results = [];
+
+    for (const course of courses) {
+      const learners = await Order.find({ "items._id": course._id });
+      const courseInfo = await getCourseDetailInfo(course._id);
+
+      const studentsOfCourse = learners.map((student) => student.user);
+
+      let totalStudyTime = 0;
+      for (const student of studentsOfCourse) {
+        const { totalVideosLengthDone } = await getProgressOfCourse(course._id, student._id);
+        totalStudyTime += totalVideosLengthDone;
+      }
+
+      const avgStudyTime = totalStudyTime / studentsOfCourse.length;
+
+      const courseReportItem = {
+        _id: course._id,
+        name: course.name,
+        learners: learners.length,
+        avgStudyTime: studentsOfCourse.length === 0 ? 0 : avgStudyTime,
+        views: course.views,
+        socialInteractions: 0,
+        totalVideosLength: courseInfo.totalVideosLength,
+        lessons: courseInfo.lessons,
+      };
+
+      results.push(courseReportItem);
+    }
+
+    res.status(200).json({
+      message: "Successfully to get reports of course insights",
+      reports: results,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to fetch reports of course insights");
       error.statusCode(422);
       return error;
     }

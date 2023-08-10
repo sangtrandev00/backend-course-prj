@@ -69,5 +69,15 @@ const orderSchema = new Schema(
   { timestamps: true }
 );
 
+orderSchema.index(
+  {
+    "user.name": "text",
+    "user.email": "text",
+    "items.name": "text",
+  },
+  {
+    name: "order_text_index",
+  }
+);
 //Export the model
 module.exports = mongoose.model("Order", orderSchema);

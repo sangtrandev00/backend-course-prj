@@ -40,6 +40,10 @@ router.post("/new-password", authController.postNewPassword);
 
 router.post("/reset", authController.postResetPassword);
 
+// Update User with last login
+
+router.patch("/:userId/last-login", authController.updateLastLogin);
+
 // router.get("/status", authController.getUserStatus);
 
 module.exports = router;

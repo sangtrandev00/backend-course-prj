@@ -394,3 +394,29 @@ exports.postNewPassword = async (req, res, next) => {
 exports.getUserStatus = async (req, res, next) => {};
 
 exports.postResetPassword = async (req, res, next) => {};
+
+exports.updateLastLogin = async (req, res, next) => {
+  const { userId } = req.params;
+  const { lastLogin } = req.body;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(userId, { lastLogin });
+
+    console.log(updatedUser);
+
+    res.status(200).json({
+      message: "Successfully to update last login for user",
+      updatedUser: {
+        _id: updatedUser._id,
+        lastLogin: updatedUser.lastLogin,
+      },
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to update last login for user");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};

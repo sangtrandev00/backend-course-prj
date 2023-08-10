@@ -138,10 +138,63 @@ exports.getOrder = async (req, res, next) => {
 };
 
 exports.getOrders = async (req, res, next) => {
-  try {
-    const orders = await Order.find().populate("user._id", "_id name avatar email phone");
+  const { courseId, date, searchText } = req.query;
 
-    console.log(orders);
+  console.log("course id: ", courseId);
+  console.log("date: ", date);
+  const currentDate = new Date();
+
+  let previousDays = -1;
+
+  switch (date) {
+    case "all":
+      previousDays = -1;
+      break;
+    case "today":
+      previousDays = 0;
+      break;
+    case "yesterday":
+      previousDays = 1;
+      break;
+    case "7days":
+      previousDays = 7;
+      break;
+    case "30days":
+      previousDays = 30;
+      break;
+
+    default:
+      break;
+  }
+  const previousDaysAgo = new Date(currentDate);
+  previousDaysAgo.setDate(previousDaysAgo.getDate() - previousDays);
+
+  // console.log("previous days: ", previousDaysAgo);
+  // console.log("current date: ", currentDate);
+
+  try {
+    const orderQuery = {};
+
+    if (courseId && courseId !== "all") {
+      orderQuery["items._id"] = courseId;
+    }
+
+    if (previousDays !== -1) {
+      orderQuery.createdAt = {
+        $gte: previousDaysAgo,
+        $lte: currentDate,
+      };
+    }
+
+    if (searchText) {
+      orderQuery.$text = {
+        $search: searchText,
+      };
+    }
+
+    console.log("order query: ", orderQuery);
+
+    const orders = await Order.find(orderQuery).populate("user._id", "_id name avatar email phone");
 
     const result = orders.map((orderItem) => {
       return {
@@ -160,6 +213,8 @@ exports.getOrders = async (req, res, next) => {
     res.json({
       message: "fetch all orders successfully!",
       orders: result,
+      count: orders.length,
+      total: orders.reduce((acc, order) => acc + order.totalPrice, 0),
     });
   } catch (error) {
     if (!error) {

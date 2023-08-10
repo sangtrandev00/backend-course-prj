@@ -17,20 +17,10 @@ router.get("/reports/revenues", reportController.getRevenues);
 // GET NEW SIGNUPS
 router.get("/reports/new-signups", reportController.getNewUserSignups);
 
-// // GET LESSON BY SECTION ID
-// router.get("/lessons/:sectionId/section", reportController.getLessonsBySectionId);
+// GET REPORTS FOR USER PROGRESS
+router.get("/reports/users-progress", reportController.getReportsUserProgress);
 
-// // POST Lesson
-// router.post("/lesson", uploadMiddleware.array("images[]"), reportController.postLesson);
-
-// // PUT Lesson
-// router.put(
-//   "/lesson/:lessonId",
-//   uploadMiddleware.array("images[]"),
-//   reportController.updateLesson
-// );
-
-// // DELETE Lesson
-// router.delete("/lessons/:lessonId", reportController.deleteLesson);
+// GET REPORTS FOR COURSE INSIGHTS
+router.get("/reports/course-insights", reportController.getReportsCourseInsights);
 
 module.exports = router;
