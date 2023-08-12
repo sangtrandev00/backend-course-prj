@@ -190,10 +190,7 @@ exports.adminLogin = async (req, res, next) => {
   try {
     const userDoc = await User.findOne({ email, providerId: "local" });
     if (!userDoc) {
-      const error = new Error({
-        errorType: "email",
-        message: "Could not find user by email!",
-      });
+      const error = new Error("Could not find user by this email");
 
       error.statusCode = 401;
       throw error;
@@ -204,7 +201,7 @@ exports.adminLogin = async (req, res, next) => {
     console.log(role);
 
     // Authorization
-    if (role !== "ADMIN" && role !== "INSTRUCTOR") {
+    if (role !== "ADMIN" && role !== "INSTRUCTOR" && role !== "TEACHER") {
       const error = new Error("Could not authenticate because this account not admin role!");
       error.statusCode = 422;
       throw error;
@@ -217,7 +214,7 @@ exports.adminLogin = async (req, res, next) => {
 
     // Create json webtoken here!!!
     const token = jwt.sign(
-      { email: userDoc.email, userId: userDoc._id.toString() },
+      { email: userDoc.email, userId: userDoc._id.toString(), adminRole: userDoc.role },
       "somesupersecret",
       { expiresIn: "1h" }
     );

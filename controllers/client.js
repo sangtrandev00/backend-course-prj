@@ -23,6 +23,7 @@ const fs = require("fs");
 const path = require("path");
 const { UNSPLASH_API_KEY } = require("../config/constant");
 const { searchYouTubeVideos } = require("../utils/youtube");
+const Certificate = require("../models/Certificate");
 // const Category = require('../models/category');
 
 exports.getCategories = async (req, res, next) => {
@@ -1058,13 +1059,14 @@ exports.getInvoices = async (req, res, next) => {};
 
 // POST (GENREATE) CERTIFICATIONS
 
-exports.postCertification = async (req, res, next) => {
-  const { userName, courseName, completionDate } = req.body;
-
+const generateCertifcate = (userName, courseName, completionDate, res) => {
   // Load the certificate template
   // "images/certificate-template.pdf"
+
+  const transformedCourseName = courseName.trim().split(" ").join("-");
+
   const certificateTemplatePath = path.join("images", "certificate-template.png");
-  const certifcationName = `${userName}-certificate.pdf`;
+  const certifcationName = `${userName}-${transformedCourseName}-certificate.pdf`;
   const outputCertification = path.join("images", certifcationName);
   const outputPath = `certificates/${userName}-certificate.pdf`;
 
@@ -1100,8 +1102,87 @@ exports.postCertification = async (req, res, next) => {
   // Finalize the PDF document
   doc.end();
 
-  // Respond with the generated certificate path
-  res.json({ certificatePath: outputCertification });
+  return certifcationName;
+};
+
+exports.postCertificate = async (req, res, next) => {
+  const { userId, courseId, completionDate } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    const course = await Course.findById(courseId);
+
+    const certificateName = generateCertifcate(user.name, course.name, completionDate, res);
+
+    const newCertificate = new Certificate({
+      certificateName: certificateName,
+      user: {
+        _id: userId,
+      },
+      course: {
+        _id: courseId,
+      },
+    });
+
+    const createdCertificate = await newCertificate.save();
+
+    res.status(201).json({
+      message: "Post certificate successfully!",
+      certificate: createdCertificate,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to create certificates for user!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.deleteCertificate = async (req, res, next) => {
+  const { userId, courseId } = req.query;
+
+  try {
+    const response = await Certificate.deleteMany({
+      "user._id": userId,
+      "course._id": courseId,
+    });
+
+    res.status(201).json({
+      message: "get certification successfully!",
+      result: response,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to create certifications for user!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
+};
+
+exports.getCertificate = async (req, res, next) => {
+  const { userId, courseId } = req.query;
+
+  try {
+    const certificate = await Certificate.findOne({
+      "user._id": userId,
+      "course._id": courseId,
+    });
+    res.status(201).json({
+      message: "get certification successfully!",
+      certificate,
+    });
+  } catch (error) {
+    if (!error) {
+      const error = new Error("Failed to create certifications for user!");
+      error.statusCode(422);
+      return error;
+    }
+    next(error);
+  }
 };
 
 exports.getAiImages = async (req, res, next) => {

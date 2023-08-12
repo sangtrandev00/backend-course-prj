@@ -7,6 +7,8 @@ const { validationResult } = require("express-validator");
 exports.getCourses = async (req, res, next) => {
   const { _q, _page, _limit, _author, _category } = req.query;
 
+  console.log("body: ", req.query);
+
   const skip = ((+_page || 1) - 1) * _limit;
 
   const query = {};
@@ -15,7 +17,7 @@ exports.getCourses = async (req, res, next) => {
     query.$text = { $search: _q };
   }
 
-  if (_author) {
+  if (_author && _author !== "all") {
     query.userId = {
       $in: _author.split(","),
     };
@@ -184,6 +186,8 @@ exports.createRandomCourses = async (req, res, next) => {
 };
 
 exports.postCourse = async (req, res, next) => {
+  console.log("body: ", req.body);
+
   const {
     name,
     thumbnail,
@@ -196,7 +200,6 @@ exports.postCourse = async (req, res, next) => {
     userId,
     courseSlug,
   } = req.body;
-  console.log(req.files);
   // const images = req.files.map((item) => item.path.replace("\\", "/"));
   // const thumb = images.find((image) => image.includes("thumb"));
 

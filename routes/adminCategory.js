@@ -4,23 +4,28 @@ const { check, body } = require("express-validator");
 
 const adminCategoriesController = require("../controllers/adminCategories");
 const isAuth = require("../middleware/is-auth");
+const isAdmin = require("../middleware/is-admin");
+const isAuthorize = require("../middleware/authorization");
 const Category = require("../models/Category");
 
 const router = express.Router();
 
 // GET CATEGORIES
-router.get("/categories", adminCategoriesController.getCategories);
+// Is Auth to protect the route
+router.get("/categories", isAuth, adminCategoriesController.getCategories);
 
 // GET ALL CATEGORIES
-router.get("/categories", adminCategoriesController.getAllCategories);
+router.get("/all-categories", adminCategoriesController.getAllCategories);
 
 // GET CATEGORY
-router.get("/categories/:categoryId/single", adminCategoriesController.getCategory);
+router.get("/categories/:categoryId/single", isAuth, adminCategoriesController.getCategory);
 
 // POST CATE
 // Should put the middleware upload multer here at route
 router.post(
   "/category",
+  isAuth,
+  isAdmin,
   uploadMiddleware.single("cateImage"),
   body("name")
     .isLength({ min: 3 })
@@ -38,6 +43,8 @@ router.post(
 // PUT CATE
 router.put(
   "/category/:categoryId",
+  isAuth,
+  isAdmin,
   uploadMiddleware.single("cateImage"),
   body("name")
     .isLength({ min: 3 })
@@ -53,6 +60,6 @@ router.put(
 );
 
 // DELETE CATE
-router.delete("/categories/:categoryId", adminCategoriesController.deleteCategory);
+router.delete("/categories/:categoryId", isAuth, isAdmin, adminCategoriesController.deleteCategory);
 
 module.exports = router;

@@ -100,15 +100,15 @@ exports.createRandomUser = async (req, res, next) => {
 };
 
 exports.postUser = async (req, res, next) => {
-  const { name, email, phone, address, password, role } = req.body;
+  const { name, email, phone, address, password, role, avatar } = req.body;
 
-  console.log(req.file);
-  let avatar;
-  if (req.file) {
-    avatar = req.file.path.replace("\\", "/");
-  } else {
-    avatar =
+  console.log(req.body);
+  let avatarUrl;
+  if (!avatar) {
+    avatarUrl =
       "https://lwfiles.mycourse.app/64b5524f42f5698b2785b91e-public/avatars/thumbs/64c077e0557e37da3707bb92.jpg";
+  } else {
+    avatarUrl = avatar;
   }
 
   //   No validate yet!
@@ -120,13 +120,17 @@ exports.postUser = async (req, res, next) => {
       return next(error);
     }
 
+    const hashedPassword = await bcrypt.hash(password, 12);
+
     const newUser = new User({
       email,
       name,
       phone,
-      avatar,
+      avatar: avatarUrl,
       role,
+      password: hashedPassword,
     });
+
     const result = await newUser.save();
 
     res.status(201).json({

@@ -90,7 +90,13 @@ router.post("/courses/:courseId/reviews", clientController.postReview);
 router.get("/courses/:courseId/reviews", clientController.getCourseReviews);
 
 // POST CREATE CERTIFICATIONS
-router.post("/generate-certification", clientController.postCertification);
+router.post("/generate-certificate", clientController.postCertificate);
+
+// GET CERTIFICATION BY USER AND COURSE ID
+router.get("/get-certificate", clientController.getCertificate);
+
+// DELETE CERTIFICATIONS BY USER AND COURSE ID
+router.delete("/delete-certificates", clientController.deleteCertificate);
 
 // GENREATE AI IMAGES
 router.get("/genrate-ai-images", clientController.getAiImages);
