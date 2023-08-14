@@ -47,7 +47,7 @@ router.put(
   isAdmin,
   uploadMiddleware.single("cateImage"),
   body("name")
-    .isLength({ min: 3 })
+    .isLength({ min: 2 })
     .withMessage("Please enter a input field category with at least 3 characters."),
   // .custom((value, { req }) => {
   //   return Category.findOne({ name: value }).then((categoryDoc) => {
