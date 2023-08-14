@@ -1,6 +1,4 @@
-# Project: E-LEARNING-PLATFORM
-+ Description: I have build a RESTFUL API using Nodejs for this project. Take a look at my api documentation
-+ follow me: https://trannhatsang.com
+# Project: E-LEARNING
 # 📁 Collection: Categories 
 
 
