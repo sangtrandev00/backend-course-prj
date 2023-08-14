@@ -17,6 +17,7 @@ const {
   createOutline,
   getCourseDetailInfo,
   getCoursesOrderedByUserInfo,
+  getLessonsByCourseId,
 } = require("../utils/helper");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
@@ -215,7 +216,9 @@ const buildQuery = (req) => {
 };
 
 exports.getCourses = async (req, res, next) => {
-  const { _limit, _sort, _q, _min, _max, _page, _cateIds, userId } = req.query;
+  const { _limit, _sort, _q, _min, _max, _page, _cateIds, userId, _cateName } = req.query;
+
+  console.log("userId: ", userId);
 
   const page = _page || 1;
 
@@ -254,7 +257,7 @@ exports.getCourses = async (req, res, next) => {
     const coursesOfUser = await getCoursesOrderedByUserInfo(userId);
     const courseIdOfUserList = coursesOfUser.map((course) => course._id.toString());
 
-    const result = [];
+    let result = [];
 
     for (const course of courses) {
       const courseItem = {
@@ -363,13 +366,20 @@ exports.getPopularCourses = async (req, res, next) => {
 
   try {
     const coursePopularity = await Order.aggregate([
-      { $unwind: "$items" }, // Unwind the items array
-      { $group: { _id: "$items._id", count: { $sum: 1 } } }, // Group and count course occurrences
+      { $unwind: "$items" }, // Unwind the items array --> What is unwind in this case
+      { $group: { _id: "$items._id", count: { $sum: 1 } } }, // Group and count course occurrences, Why sum 1. Other params ?
       { $sort: { count: -1 } }, // Sort by count in descending order
       { $limit: +_limit || 10 }, // Limit the result to the top 10 courses, adjust as needed
     ]);
 
     const popularCourseIds = coursePopularity.map((entry) => entry._id);
+
+    const totalCourses = (
+      await Order.aggregate([
+        { $unwind: "$items" }, // Unwind the items array --> What is unwind in this case
+        { $group: { _id: "$items._id", count: { $sum: 1 } } }, // Group and count course occurrences, Why sum 1. Other params ?
+      ])
+    ).length;
 
     // Fetch course details using the popular IDs
     const popularCourses = await Course.find({ _id: { $in: popularCourseIds } })
@@ -379,6 +389,11 @@ exports.getPopularCourses = async (req, res, next) => {
     res.status(200).json({
       message: "Fetch all popular Courses successfully!",
       courses: popularCourses,
+      pagination: {
+        _page: 1,
+        _limit: +_limit || 10,
+        _totalRows: totalCourses,
+      },
       coursePopularity,
     });
   } catch (error) {
@@ -391,10 +406,43 @@ exports.getPopularCourses = async (req, res, next) => {
   }
 };
 
+// exports.getCoursesByCate = async (req, res, next) => {
+
+//   try {
+//     const query = {};
+
+//     const courses = await Course.find(query).populate("categoryId", "_id name");
+
+//     res.status(200).json({
+//       message: "Fetch courses by category successfully!",
+//       courses,
+//     });
+//   } catch (error) {
+//     if (!error) {
+//       const error = new Error("Failed to fetch courses by category!");
+//       error.statusCode = 422;
+//       return error;
+//     }
+//     next(error);
+//   }
+// };
+
 exports.retrieveCartByIds = async (req, res, next) => {
   const { _courseIds } = req.query;
 
   console.log("courseId: ", _courseIds);
+
+  if (!_courseIds) {
+    res.status(200).json({
+      message: "Cart is empty!",
+      cart: {
+        items: [],
+        totalPrice: 0,
+      },
+    });
+
+    return;
+  }
 
   try {
     const courses = await Course.find({
@@ -721,7 +769,6 @@ exports.getCourseEnrolledByUserId = async (req, res, next) => {
       courseId,
     });
 
-    let numOfLesson = 0;
     let numOfLessonDone = 0;
 
     let lessonsOfCourse = [];
@@ -735,7 +782,7 @@ exports.getCourseEnrolledByUserId = async (req, res, next) => {
 
     lessonsOfCourse = lessonsOfCourse.flat();
 
-    console.log(lessonsOfCourse);
+    // console.log(lessonsOfCourse);
 
     for (const lesson of lessonsOfCourse) {
       const isDone = await IsLessonDone.findOne({
@@ -753,10 +800,12 @@ exports.getCourseEnrolledByUserId = async (req, res, next) => {
     const result = {
       ...course._doc,
       progress: numOfLessonDone / lessonsOfCourse.length,
+      sections: sectionsOfCourse,
+      lessons: lessonsOfCourse,
     };
 
     res.status(200).json({
-      message: "Fetch single Course successfully!",
+      message: "Fetch single Course enrolled by user id successfully!",
       course: result,
     });
   } catch (error) {

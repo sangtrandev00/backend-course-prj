@@ -326,7 +326,7 @@ exports.getCourseDetailInfo = async (courseId) => {
   try {
     const course = await Course.findById(courseId)
       .populate("categoryId", "_id name")
-      .populate("userId", "_id name");
+      .populate("userId", "_id name avatar");
 
     const sections = await Section.find({
       courseId,
@@ -372,6 +372,7 @@ exports.getCourseDetailInfo = async (courseId) => {
       userId: {
         _id: course.userId._id,
         name: course.userId.name,
+        avatar: course.userId.avatar,
       },
       courseSlug: course.courseSlug,
       level: course.level,
@@ -395,6 +396,25 @@ exports.getCourseDetailInfo = async (courseId) => {
     next(error);
   }
 };
+
+// exports.getLessonsByCourseId = async (courseId) => {
+//   try {
+//     // Check if the courseId exists in the Course collection
+//     const course = await Course.findById(courseId);
+//     if (!course) {
+//       return res.status(404).json({ error: "Course not found" });
+//     }
+
+//     // Query all lessons with the given courseId
+//     const lessons = await Lesson.find({ sectionId: { $in: course.sections } });
+
+//     console.log("lessons: ", lessons);
+
+//     return lessons;
+//   } catch (error) {
+//     return [];
+//   }
+// };
 
 exports.getCoursesOrderedByUserInfo = async (userId) => {
   try {
