@@ -1,7 +1,4 @@
-# Project: E-LEARNING-PLATFORM
-+ Description: I have build a RESTFUL API for learning and managing courses online using Nodejs for this project. Take a look at my api documentation
-+ Follow me: https://trannhatsang.com
-+ Online api domain: [https://backend-course-project-7bc2.onrender.com/](https://backend-course-project-7bc2.onrender.com/)
+# Project: E-LEARNING
 # 📁 Collection: Categories 
 
 

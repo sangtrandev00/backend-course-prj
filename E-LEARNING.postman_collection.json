@@ -1,0 +1,1970 @@
+{
+	"info": {
+		"_postman_id": "14794278-37b6-4e85-bbb2-e89ed822d795",
+		"name": "E-LEARNING",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19846418"
+	},
+	"item": [
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "GET CATES",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/categories",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ALL CATES",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/all-categories",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"all-categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET CATE BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/categories/64b363573bbbb6317297378d/single",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"categories",
+								"64b363573bbbb6317297378d",
+								"single"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST CATE",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT CATE",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Blockchain",
+									"type": "text"
+								},
+								{
+									"key": "cateImage",
+									"value": "https://images.unsplash.com/photo-1639322537228-f710d846310a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1332&q=80",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Blockchain for chain",
+									"type": "text"
+								},
+								{
+									"key": "cateSlug",
+									"value": "blockchain-techonology",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/admin/category/64bb4e1582a5abc6b1c13305",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"category",
+								"64bb4e1582a5abc6b1c13305"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE CATE (NOT TEST )",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Blockchain",
+									"type": "text"
+								},
+								{
+									"key": "cateImage",
+									"value": "https://images.unsplash.com/photo-1639322537228-f710d846310a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1332&q=80",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Blockchain for chain",
+									"type": "text"
+								},
+								{
+									"key": "cateSlug",
+									"value": "blockchain-techonology",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/admin/category/64bb4e1582a5abc6b1c13305",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"category",
+								"64bb4e1582a5abc6b1c13305"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "GET COURES",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/courses",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"courses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURES HAVE BOUGHT",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/orders",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURE BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/courses/646891c65ff2f5b8930b5329",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"courses",
+								"646891c65ff2f5b8930b5329"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST COURSE",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "HTML CSS basic for newbite",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sections",
+			"item": [
+				{
+					"name": "GET SECTIONS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/sections",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"sections"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET SECTION BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/sections/64b38fca581c74da27d58f0e",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"sections",
+								"64b38fca581c74da27d58f0e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET SECTIONS BY COURSE ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/sections/646891c65ff2f5b8930b5329/course",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"sections",
+								"646891c65ff2f5b8930b5329",
+								"course"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST SECTION",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/admin/section",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"section"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lessons",
+			"item": [
+				{
+					"name": "GET LESSONS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/lessons",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"lessons"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET LESSONS BY SECTION ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/lessons/64b38fca581c74da27d58f0e/section",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"lessons",
+								"64b38fca581c74da27d58f0e",
+								"section"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET LESSON  BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/lessons/64b391c4581c74da27d58f21",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"lessons",
+								"64b391c4581c74da27d58f21"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST LESSON",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Trần Nhật Sang\",\r\n    \"content\": \"https://www.youtube.com/watch?v=_u3xST8mzs4&ab_channel=F8Official\",\r\n    \"access\": \"SOON\",\r\n    \"sectionId\": \"64b38fca581c74da27d58f0e\",\r\n    \"type\": \"video\",\r\n    \"description\": \"fsdfsfdsfds\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/admin/lesson",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"lesson"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Client",
+			"item": [
+				{
+					"name": "GET CATEGORIES",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/categories",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURSES",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/courses?userId=6468a145401d3810494f4797",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "6468a145401d3810494f4797"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURSES AFTER LOGIN",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/courses/logined?userId=6468a145401d3810494f4797",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses",
+								"logined"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "6468a145401d3810494f4797"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURSES POPULAR",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/courses/popular",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses",
+								"popular"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET CART RETRIEVE FROM DB",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"courseIds\": [\r\n        \"64bb390719f0935f065b9892\",\r\n        \"64c5d873c573c1ec5d4a18f5\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/cart/retrieve?_courseIds=64bb390719f0935f065b9892%2C64c5d873c573c1ec5d4a18f5%2C64c5d873c573c1ec5d4a18f7%2C64c5d873c573c1ec5d4a18fd",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"cart",
+								"retrieve"
+							],
+							"query": [
+								{
+									"key": "_courseIds",
+									"value": "64bb390719f0935f065b9892%2C64c5d873c573c1ec5d4a18f5%2C64c5d873c573c1ec5d4a18f7%2C64c5d873c573c1ec5d4a18fd"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET AUTHORS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/authors",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"authors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SEARCH COURSE",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/courses?_page=1&_limit=14",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses"
+							],
+							"query": [
+								{
+									"key": "_page",
+									"value": "1"
+								},
+								{
+									"key": "_limit",
+									"value": "14"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURSE BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/courses/646891c65ff2f5b8930b5329",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses",
+								"646891c65ff2f5b8930b5329"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURSE BY ID ENROLLED BY USER ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "6468a145401d3810494f4797",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host}}/courses/646891c65ff2f5b8930b5329/enrolled",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses",
+								"646891c65ff2f5b8930b5329",
+								"enrolled"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURSE DETAIL",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/courses/646891c65ff2f5b8930b5329/detail",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses",
+								"646891c65ff2f5b8930b5329",
+								"detail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET SECTIONS BY COURSE ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/sections/646891c65ff2f5b8930b5329/course",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"sections",
+								"646891c65ff2f5b8930b5329",
+								"course"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET SECTIONS BY COURSE ID AT ENROLLED COURSE",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/sections/646891c65ff2f5b8930b5329/course",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"sections",
+								"646891c65ff2f5b8930b5329",
+								"course"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET LESSONS BY SECTION ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "6468a145401d3810494f4797",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host}}/lessons/64b38fca581c74da27d58f0e/section",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"lessons",
+								"64b38fca581c74da27d58f0e",
+								"section"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET LESSONS BY SECTION ID AT ENROLLED COURSE",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "6468a145401d3810494f4797",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host}}/lessons/64b38fca581c74da27d58f0e/section/course-enrolled",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"lessons",
+								"64b38fca581c74da27d58f0e",
+								"section",
+								"course-enrolled"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ORDER BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/orders/6469cff42c2428dc06675825",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"orders",
+								"6469cff42c2428dc06675825"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST COURSE REVIEW BY USER ID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"courseId\": \"646891c65ff2f5b8930b5329\",\r\n    \"title\": \"Wonderful course i ever got in my life\",\r\n    \"content\": \"Wonderful course i ever got in my life, I learnt it from the instructor, he's so great and have a lot of energy\",\r\n    \"ratingStar\": 4.5,\r\n    \"orderId\": \"64bf737d427e81c39898840f\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/courses/6469cff42c2428dc06675825/reviews",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses",
+								"6469cff42c2428dc06675825",
+								"reviews"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURSE REVIEWS",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"courseId\": \"646891c65ff2f5b8930b5329\",\r\n    \"title\": \"Wonderful course i ever got in my life\",\r\n    \"content\": \"Wonderful course i ever got in my life, I learnt it from the instructor, he's so great and have a lot of energy\",\r\n    \"ratingStar\": 4.5,\r\n    \"orderId\": \"64bf737d427e81c39898840f\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/courses/646891c65ff2f5b8930b5329/reviews",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses",
+								"646891c65ff2f5b8930b5329",
+								"reviews"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET USER BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/users/6468a145401d3810494f4797",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								"6468a145401d3810494f4797"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET USER BY ID DETAIL",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/users/6468a145401d3810494f4797/detail",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								"6468a145401d3810494f4797",
+								"detail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET COURES HAVE BOUGHT BY USER ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/courses/6468a145401d3810494f4797/ordered",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"courses",
+								"6468a145401d3810494f4797",
+								"ordered"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CHECK LESSON DONE",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": \"6468a145401d3810494f4797\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/lesson/64b391c4581c74da27d58f21/is-done",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"lesson",
+								"64b391c4581c74da27d58f21",
+								"is-done"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST ORDER - CREATE ORDER",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n      \"items\": [\r\n        {\r\n          \"_id\": \"64bc902ff90fd644ace09dfb\",\r\n          \"courseName\": \"Course 3 \",\r\n          \"finalPrice\": 12,\r\n          \"thumbnail\": \"https://cdn.mycourse.app/images/site-templates/79ae2363c5798f1d6e79d14f2c7c3730.png\"\r\n        },\r\n        {\r\n          \"_id\": \"64bb390719f0935f065b9892\",\r\n          \"courseName\": \"Course 4\",\r\n          \"finalPrice\": 13,\r\n          \"thumbnail\": \"https://cdn.mycourse.app/images/site-templates/79ae2363c5798f1d6e79d14f2c7c3730.png\"\r\n        }\r\n      ],\r\n      \"user\": {\r\n        \"_id\": \"6468a145401d3810494f4797\",\r\n        \"email\": \"nhatsang0101@gmail.com\",\r\n        \"name\": \"Tran Nhat Sang\",\r\n        \"phone\": \"0909129345\"\r\n      },\r\n      \"transaction\": {\r\n        \"method\": \"VNPay\"\r\n      },\r\n      \"totalPrice\": 300,\r\n      \"note\": \"No caption\",\r\n      \"vatFee\": 20\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/order",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST ORDER - CREATE ORDER Copy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n      \"items\": [\r\n        {\r\n          \"courseId\": \"64bc902ff90fd644ace09dfb\",\r\n          \"courseName\": \"Course 3 \",\r\n          \"finalPrice\": 12,\r\n          \"thumbnail\": \"https://cdn.mycourse.app/images/site-templates/79ae2363c5798f1d6e79d14f2c7c3730.png\"\r\n        },\r\n        {\r\n          \"courseId\": \"64bb390719f0935f065b9892\",\r\n          \"courseName\": \"Course 4\",\r\n          \"finalPrice\": 13,\r\n          \"thumbnail\": \"https://cdn.mycourse.app/images/site-templates/79ae2363c5798f1d6e79d14f2c7c3730.png\"\r\n        }\r\n      ],\r\n      \"user\": {\r\n        \"_id\": \"6468a145401d3810494f4797\",\r\n        \"email\": \"nhatsang0101@gmail.com\",\r\n        \"name\": \"Tran Nhat Sang\",\r\n        \"phone\": \"0909129345\"\r\n      },\r\n      \"transaction\": {\r\n        \"method\": \"VNPay\"\r\n      },\r\n      \"totalPrice\": 300,\r\n      \"note\": \"No caption\",\r\n      \"vatFee\": 20\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/order",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE LESSON DONE BY USER ID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": \"6468a145401d3810494f4797\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/lesson-done/64b391c4581c74da27d58f21",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"lesson-done",
+								"64b391c4581c74da27d58f21"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST CERTIFICATION",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": \"6468a145401d3810494f4797\",\r\n    \"userName\": \"Trần Nhật Sang\",\r\n    \"courseId\": \"646891c65ff2f5b8930b5329\",\r\n    \"courseName\": \"HTML CSS basic for newbite\",\r\n    \"completionDate\": \"11/8/2023\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/generate-certificate",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"generate-certificate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE CERTIFICATION",
+					"request": {
+						"auth": {
+							"type": "jwt",
+							"jwt": [
+								{
+									"key": "algorithm",
+									"value": "HS256",
+									"type": "string"
+								},
+								{
+									"key": "isSecretBase64Encoded",
+									"value": false,
+									"type": "boolean"
+								},
+								{
+									"key": "payload",
+									"value": "{}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "headerPrefix",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "queryParamKey",
+									"value": "token",
+									"type": "string"
+								},
+								{
+									"key": "header",
+									"value": "{}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": \"6468a145401d3810494f4797\",\r\n    \"userName\": \"Trần Nhật Sang\",\r\n    \"courseId\": \"646891c65ff2f5b8930b5329\",\r\n    \"courseName\": \"HTML CSS basic for newbite\",\r\n    \"completionDate\": \"11/8/2023\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/delete-certificates?userId=6468a145401d3810494f4797&courseId=64b39fdbc3fb440d0c628768",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"delete-certificates"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "6468a145401d3810494f4797"
+								},
+								{
+									"key": "courseId",
+									"value": "64b39fdbc3fb440d0c628768"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET CERTIFICATES BY COUSRE ID AND USER ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": \"6468a145401d3810494f4797\",\r\n    \"userName\": \"Trần Nhật Sang\",\r\n    \"courseId\": \"646891c65ff2f5b8930b5329\",\r\n    \"courseName\": \"HTML CSS basic for newbite\",\r\n    \"completionDate\": \"11/8/2023\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/get-certificate?courseId=646891c65ff2f5b8930b5329&userId=6468a145401d3810494f4797",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"get-certificate"
+							],
+							"query": [
+								{
+									"key": "courseId",
+									"value": "646891c65ff2f5b8930b5329"
+								},
+								{
+									"key": "userId",
+									"value": "6468a145401d3810494f4797"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE RANDOM COURSES",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userName\": \"Tran Nhat Sang\",\r\n    \"courseName\": \"Reactjs\",\r\n    \"completionDate\": \"01/08/2023\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/genrate-random-courses",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"genrate-random-courses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE AI IMAGES",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userName\": \"Tran Nhat Sang\",\r\n    \"courseName\": \"Reactjs\",\r\n    \"completionDate\": \"01/08/2023\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/genrate-ai-images",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"genrate-ai-images"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE RANDOMS COURSES",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userName\": \"Tran Nhat Sang\",\r\n    \"courseName\": \"Reactjs\",\r\n    \"completionDate\": \"01/08/2023\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/genrate-random-courses",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"genrate-random-courses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CALL API FROM UNSPLASH",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/get-unsplash-images",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"get-unsplash-images"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE OUTLINE FROM COURSE NAME",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/generate-outline-course",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"generate-outline-course"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE OUTLINE COURSE",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"courseId\": \"64c5d873c573c1ec5d4a1907\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/create-outline-course",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"create-outline-course"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE LESSONS OF OUTLINE",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"courseId\": \"64c5d873c573c1ec5d4a1907\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/generate-lesson-of-outline",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"generate-lesson-of-outline"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE LESSON BASE ON OUTLINE COURSE",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"courseId\": \"64c5d873c573c1ec5d4a1907\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/create-lessons-of-outline-course",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"create-lessons-of-outline-course"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE WHOLE COURSE BY COURSE ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"courseId\": \"64c5d873c573c1ec5d4a1907\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/generate-whole-course",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"generate-whole-course"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE WHOLE COURSE BY COURSE ID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"courseId\": \"64c5d873c573c1ec5d4a1901\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/create-whole-course",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"create-whole-course"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET YOUTUBE VIDEOS FROM YOUTUBE API",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"courseId\": \"64c5d873c573c1ec5d4a18f5\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.googleapis.com/youtube/v3/search?part=snippet&q=\"elon musk\"&key=\"AIzaSyDCh4pDvYFVJe5Lu_DbHT_kBgrJma83FxI\"&maxResults=2",
+							"protocol": "https",
+							"host": [
+								"www",
+								"googleapis",
+								"com"
+							],
+							"path": [
+								"youtube",
+								"v3",
+								"search"
+							],
+							"query": [
+								{
+									"key": "part",
+									"value": "snippet"
+								},
+								{
+									"key": "q",
+									"value": "\"elon musk\""
+								},
+								{
+									"key": "key",
+									"value": "\"AIzaSyDCh4pDvYFVJe5Lu_DbHT_kBgrJma83FxI\""
+								},
+								{
+									"key": "maxResults",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "GET ORDERS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/orders",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ORDER BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/orders/6469cff42c2428dc06675825",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"orders",
+								"6469cff42c2428dc06675825"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "GET USERS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/users",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST USER",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Leo Messi\",\r\n    \"email\": \"leo@gmail.com\",\r\n    \"phone\": \"0931223521\",\r\n    \"role\": \"ADMIN\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/admin/user",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT USER - UPDATE USER",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Sang Dev 2 updated",
+									"type": "text"
+								},
+								{
+									"key": "avatar",
+									"value": "https://plus.unsplash.com/premium_photo-1670002383626-10c63bbe67d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "090919236",
+									"type": "text"
+								},
+								{
+									"key": "role",
+									"value": "ADMIN",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "info@trannhatsang.com",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/admin/user/6468a173401d3810494f479a",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"user",
+								"6468a173401d3810494f479a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET USER BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/users/6468a173401d3810494f479a",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								"6468a173401d3810494f479a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE USER (NOT TEST )",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/admin/users/6468a173401d3810494f479a",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								"6468a173401d3810494f479a"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Sign Up",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"nhatsang0102@gmail.com\",\r\n    \"name\": \"Tran Nhat Sang 2\", \r\n    \"password\": \"12345678\",\r\n    \"role\": \"STUDENT\",\r\n    \"avatar\": \"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=580&q=80\",\r\n    \"providerId\": \"local\",\r\n    \"fbUserId\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/auth/signup",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"nhatsang0101@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/auth/login",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE LAST LOGIN FOR USER",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"lastLogin\": \"Thu Aug 10 2023 09:08:08 GMT+0700 (Giờ Đông Dương)\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/auth/6468a145401d3810494f4797/last-login",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"6468a145401d3810494f4797",
+								"last-login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports Center",
+			"item": [
+				{
+					"name": "Report Summary",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"nhatsang0102@gmail.com\",\r\n    \"name\": \"Tran Nhat Sang 2\", \r\n    \"password\": \"12345678\",\r\n    \"role\": \"STUDENT\",\r\n    \"avatar\": \"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=580&q=80\",\r\n    \"providerId\": \"local\",\r\n    \"fbUserId\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/admin/reports/summary",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"reports",
+								"summary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report overview",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"nhatsang0101@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/reports/",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"reports",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report Course Sales (30 days, 60 days, ... )",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"nhatsang0101@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/admin/reports/course-sales",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"reports",
+								"course-sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report revenues (30 days .... )",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"nhatsang0101@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/admin/reports/revenues",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"reports",
+								"revenues"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report new signups",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"nhatsang0101@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/admin/reports/new-signups",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"reports",
+								"new-signups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report for users progress",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"nhatsang0101@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/admin/reports/users-progress",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"reports",
+								"users-progress"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report for course insights",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"nhatsang0101@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/admin/reports/course-insights",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"admin",
+								"reports",
+								"course-insights"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
