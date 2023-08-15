@@ -57,19 +57,16 @@ const courseSchema = new Schema(
     },
     requirements: [
       {
-        _id: Schema.Types.ObjectId,
         type: String,
       },
     ],
     willLearns: [
       {
-        _id: Schema.Types.ObjectId,
         type: String,
       },
     ],
     tags: [
       {
-        _id: Schema.Types.ObjectId,
         type: String,
       },
     ],
