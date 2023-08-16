@@ -8,12 +8,11 @@ const customError = require("../utils/error");
 const Order = require("../models/Order");
 
 exports.getUsers = async (req, res, next) => {
+  const { _q } = req.query;
 
-  const { _q} = req.query;
+  const query = {};
 
-  const query = {}
-  
-  if(_q) {
+  if (_q) {
     query.$text = { $search: _q };
   }
 
@@ -35,6 +34,7 @@ exports.getUsers = async (req, res, next) => {
         courses,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        lastLogin: user.lastLogin,
       };
     });
 
