@@ -16,7 +16,8 @@ const userSchema = new Schema(
     },
     avatar: {
       type: String,
-      default: "images/user-avatar.jpg",
+      default:
+        "https://lwfiles.mycourse.app/64b5524f42f5698b2785b91e-public/avatars/thumbs/64c077e0557e37da3707bb92.jpg",
     },
     email: {
       type: String,
@@ -52,6 +53,9 @@ const userSchema = new Schema(
   },
   { timestamps: true }
 );
+
+userSchema.index({ name: "text", email: "text" });
+
 
 //Export the model
 module.exports = mongoose.model("User", userSchema);
