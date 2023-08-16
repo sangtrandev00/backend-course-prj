@@ -57,16 +57,13 @@ module.exports = async (req, res, next) => {
   }
   req.decodedToken = decodedToken;
 
-  console.log("admin role: ", req.headers.adminrole);
-  console.log("user role: ", req.headers.userrole);
+  // console.log("admin role: ", req.headers.adminrole);
+  // console.log("user role: ", req.headers.userrole);
 
   // if (req.headers.adminrole === "admin") {
   //   req.adminToken = token;
   // } else if (req.headers.userrole === "user") {
-  //   req.token = token;
   // }
-
   req.token = token;
-
   next();
 };

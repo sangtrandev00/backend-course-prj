@@ -15,6 +15,7 @@ var serviceAccount = require("../firebase/serviceAccountKey.json");
 // const { BACKEND_URL } = require("../../frontend/src/constant/backend-domain");
 
 const { BACKEND_URL } = require("../config/backend-domain");
+const RevokedToken = require("../models/RevokedToken");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -228,6 +229,45 @@ exports.adminLogin = async (req, res, next) => {
       token: token,
       userId: userDoc._id.toString(),
     });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+// Trường hợp logout này là chưa chính xác lắm!!!. Khi logout làm sao để clear token (revoke thu hồi quyền truy cập access -> sử dụng thêm database redis, hay tạo thêm một database revoke nữa!!!);
+exports.logout = async (req, res, next) => {
+  const tokenToRevoke = req.token; // Assuming you have a middleware that extracts the token
+
+  console.log("token to revoke", tokenToRevoke);
+
+  try {
+    // Add the token to the revoked tokens collection
+    const revokedToken = new RevokedToken({ token: tokenToRevoke });
+    await revokedToken.save();
+
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.adminLogout = async (req, res, next) => {
+  const tokenToRevoke = req.token; // Assuming you have a middleware that extracts the token
+
+  console.log("token to revoke", tokenToRevoke);
+
+  try {
+    // Add the token to the revoked tokens collection
+    const revokedToken = new RevokedToken({ token: tokenToRevoke });
+    await revokedToken.save();
+
+    res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

@@ -1,6 +1,9 @@
 const express = require("express");
 const authController = require("../controllers/auth");
 const { check, body } = require("express-validator");
+const extractToken = require("../middleware/extractToken");
+const isAuth = require("../middleware/is-auth");
+const isUserAuth = require("../middleware/is-user-auth");
 
 const router = express.Router();
 
@@ -9,6 +12,13 @@ router.put("/signup", authController.signup);
 
 // POST login
 router.post("/login", authController.login);
+
+// POST Logout
+
+router.post("/logout", isUserAuth, authController.logout);
+
+// POST ADMIN LOGOUT
+router.post("/admin/logout", isAuth, authController.adminLogout);
 
 // POST google login
 router.post("/google-login", authController.googleLogin);
