@@ -3,7 +3,7 @@ const Course = require("../models/Course");
 const { deleteFile } = require("../utils/file");
 const { validationResult } = require("express-validator");
 exports.getCategories = async (req, res, next) => {
-  const { _q } = req.query;
+  const { _q, _cateName } = req.query;
 
   console.log("query: ", _q);
 
@@ -11,6 +11,10 @@ exports.getCategories = async (req, res, next) => {
 
   if (_q) {
     query.$text = { $search: _q };
+  }
+
+  if (_cateName && _cateName !== "all") {
+    query.name = _cateName;
   }
 
   try {

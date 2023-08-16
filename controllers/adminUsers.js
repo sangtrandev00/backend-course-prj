@@ -8,8 +8,17 @@ const customError = require("../utils/error");
 const Order = require("../models/Order");
 
 exports.getUsers = async (req, res, next) => {
+
+  const { _q} = req.query;
+
+  const query = {}
+  
+  if(_q) {
+    query.$text = { $search: _q };
+  }
+
   try {
-    const users = await User.find();
+    const users = await User.find(query);
     // console.log("users: ", users);
 
     const result = users.map(async (user) => {

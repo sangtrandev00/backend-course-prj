@@ -180,6 +180,8 @@ exports.getOrders = async (req, res, next) => {
     }
 
     if (previousDays !== -1) {
+      previousDaysAgo.setHours(0, 0, 0, 0); // Set time to start of the day
+
       orderQuery.createdAt = {
         $gte: previousDaysAgo,
         $lte: currentDate,
