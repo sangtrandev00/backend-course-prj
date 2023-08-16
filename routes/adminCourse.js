@@ -8,7 +8,7 @@ const { check, body } = require("express-validator");
 const isAdmin = require("../middleware/is-admin");
 
 // GET Courses
-router.get("/courses", adminCourseController.getCourses);
+router.get("/courses", isAuth, adminCourseController.getCourses);
 
 // GET BY RANGES [MIN, MAX];
 

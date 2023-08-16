@@ -783,7 +783,7 @@ exports.getCourseEnrolledByUserId = async (req, res, next) => {
     lessonsOfCourse = lessonsOfCourse.flat();
 
     // console.log(lessonsOfCourse);
-
+    const lessonIdsHasDone = [];
     for (const lesson of lessonsOfCourse) {
       const isDone = await IsLessonDone.findOne({
         userId,
@@ -792,6 +792,7 @@ exports.getCourseEnrolledByUserId = async (req, res, next) => {
 
       if (isDone) {
         numOfLessonDone += 1;
+        lessonIdsHasDone.push(lesson._id);
       }
     }
 
@@ -802,6 +803,7 @@ exports.getCourseEnrolledByUserId = async (req, res, next) => {
       progress: numOfLessonDone / lessonsOfCourse.length,
       sections: sectionsOfCourse,
       lessons: lessonsOfCourse,
+      lessonsDone: lessonIdsHasDone,
     };
 
     res.status(200).json({
@@ -820,11 +822,31 @@ exports.getCourseEnrolledByUserId = async (req, res, next) => {
 
 exports.getCourseDetail = async (req, res, next) => {
   const { courseId } = req.params;
+  const { userId } = req.query;
+
+  console.log("userId: ", userId);
+
   try {
     const result = await getCourseDetailInfo(courseId);
+    let isBought = false;
+    if (userId) {
+      const orders = await Order.find({ "user._id": userId });
+
+      const userCourses = orders.reduce((courses, order) => {
+        return courses.concat(order.items);
+      }, []);
+
+      const userCourseIds = userCourses.map((course) => course._id.toString());
+
+      isBought = userCourseIds.includes(courseId);
+    }
+
     res.status(200).json({
-      message: "Fetch single Course successfully!",
-      course: result,
+      message: "Fetch single Course successfully with and without user id!",
+      course: {
+        ...result,
+        isBought,
+      },
     });
   } catch (error) {
     if (!error) {
@@ -863,10 +885,13 @@ exports.getUserDetail = async (req, res, next) => {
         const progress = (await getProgressOfCourse(courseItem._id, userId)).progress;
         const totalVideosLengthDone = (await getProgressOfCourse(courseItem._id, userId))
           .totalVideosLengthDone;
-        const user = await User.findById(userId);
+        const user = await User.findById(courseItem._doc.userId.toString());
+
+        console.log("course item: ", courseItem._doc);
 
         return {
           ...courseItem._doc,
+          // user id here is author of course
           userId: {
             _id: user._id,
             name: user.name,
@@ -1108,7 +1133,7 @@ exports.getInvoices = async (req, res, next) => {};
 
 // POST (GENREATE) CERTIFICATIONS
 
-const generateCertifcate = (userName, courseName, completionDate, res) => {
+const generateCertificate = (userName, courseName, completionDate, res) => {
   // Load the certificate template
   // "images/certificate-template.pdf"
 
@@ -1130,23 +1155,32 @@ const generateCertifcate = (userName, courseName, completionDate, res) => {
   doc.pipe(writeStream);
 
   // Load the certificate template
-  doc.image(certificateTemplatePath, 0, 0, { width: 792, height: 612 });
+  doc.image(certificateTemplatePath, 0, 0, { width: 792, height: 700 });
 
   // Function to center text horizontally
   const centerTextX = (text) => (doc.page.width - doc.widthOfString(text)) / 2;
 
-  // Function to center text vertically with a top margin
-  const centerTextY = (text) => doc.page.height / 2 + doc.heightOfString(text) / 2 - 10; // Adjust the top margin here
+  // // Function to center text vertically with a top margin
+  // const centerTextY = (text) => doc.page.height / 2 + doc.heightOfString(text) / 2; // Adjust the top margin here
 
   // Add the user's name, course name, and completion date with technology-themed styling
-  doc
-    .fontSize(48)
-    .fillColor("#007BFF")
-    .text(userName, centerTextX(userName), centerTextY(userName));
-  doc.fontSize(36).fillColor("#4CAF50").text("Certificate of Completion", { align: "center" });
-  doc.fontSize(28).fillColor("#333").text(courseName, { align: "center" });
-  doc.fontSize(18).fillColor("#555").text("This certificate is awarded to", { align: "center" });
-  doc.fontSize(18).fillColor("#555").text(completionDate, { align: "center" });
+  // , centerTextX(userName), centerTextY(userName)
+  doc.fontSize(36).fillColor("#007BFF").text(userName, 100, 260, {
+    align: "center",
+  });
+  // doc.moveUp(4);
+  // doc.fontSize(28).fillColor("#4CAF50").text("Certificate of Completion", {
+  //   align: "center",
+  // });
+  doc.fontSize(24).fillColor("#333").text(`Course: ${courseName}`, {
+    align: "center",
+  });
+  doc.fontSize(16).fillColor("#555").text("This certificate is awarded to", {
+    align: "center",
+  });
+  doc.fontSize(16).fillColor("#555").text(completionDate, {
+    align: "center",
+  });
 
   // Finalize the PDF document
   doc.end();
@@ -1161,7 +1195,24 @@ exports.postCertificate = async (req, res, next) => {
     const user = await User.findById(userId);
     const course = await Course.findById(courseId);
 
-    const certificateName = generateCertifcate(user.name, course.name, completionDate, res);
+    const existingCertificate = await Certificate.findOne({
+      "user._id": userId,
+      "course._id": courseId,
+    });
+
+    console.log("certificate exist: ", existingCertificate);
+
+    if (existingCertificate) {
+      const error = new Error("Certificate ready exisit");
+
+      // throw new Error(error.message);
+      res.status(401).json({
+        message: "Certificate already exists!",
+      });
+      return;
+    }
+
+    const certificateName = generateCertificate(user.name, course.name, completionDate, res);
 
     const newCertificate = new Certificate({
       certificateName: certificateName,
@@ -1174,6 +1225,8 @@ exports.postCertificate = async (req, res, next) => {
     });
 
     const createdCertificate = await newCertificate.save();
+
+    console.log("Create certificates successfully HAHA!");
 
     res.status(201).json({
       message: "Post certificate successfully!",

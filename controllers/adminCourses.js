@@ -199,6 +199,10 @@ exports.postCourse = async (req, res, next) => {
     categoryId,
     userId,
     courseSlug,
+    willLearns,
+    subTitle,
+    tags,
+    requirements,
   } = req.body;
   // const images = req.files.map((item) => item.path.replace("\\", "/"));
   // const thumb = images.find((image) => image.includes("thumb"));
@@ -215,6 +219,8 @@ exports.postCourse = async (req, res, next) => {
       courseSlug,
       categoryId,
       userId,
+      willLearns,
+      subTitle,
     });
 
     const response = await course.save();
